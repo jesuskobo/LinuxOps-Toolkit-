@@ -1,0 +1,8 @@
+# Plantilla Linux (generada por GitHub)
+*.swp
+*~
+.DS_Store
+...
+
+# Reglas personalizadas para LinuxOps-Toolkit
+docs/ 

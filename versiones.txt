@@ -1,0 +1,333 @@
+LinuxOps Toolkit Roadmap
+🚀 v0.1 - Foundation
+🎯 Objetivo
+
+Construir la base del proyecto.
+
+📋 Funcionalidades
+CLI (linuxops)
+Menú interactivo
+Configuración (config.conf)
+Sistema de logs
+Sistema de colores
+Sistema de ayuda
+Sistema de versión
+Instalador
+Desinstalador
+Validación de dependencias
+Estructura del proyecto
+🧪 Pruebas
+Instalar LinuxOps.
+Ejecutar linuxops.
+Ejecutar linuxops --help.
+Ejecutar linuxops --version.
+Comprobar creación del log.
+Probar configuración.
+📚 Documentación
+README inicial.
+Instalación.
+Arquitectura.
+Licencia.
+Changelog.
+🚀 Entregable
+
+LinuxOps ya se instala y abre correctamente.
+
+🚀 v0.2 - System
+🎯 Objetivo
+
+Consultar toda la información del servidor.
+
+📋 Funcionalidades
+CPU
+Uso
+Modelo
+Núcleos
+Load Average
+Top procesos
+Memoria
+RAM
+Swap
+Disponible
+Buffers
+Cache
+Disco
+Particiones
+Espacio
+Inodos
+Directorios pesados
+Archivos grandes
+Red
+Interfaces
+IP
+Gateway
+DNS
+Puertos abiertos
+Usuarios
+Usuarios conectados
+Último login
+UID 0
+Shell
+Procesos
+Top CPU
+Top RAM
+Buscar proceso
+Sistema
+Kernel
+Hostname
+Distro
+Uptime
+Fecha
+🧪 Pruebas
+
+Probar cada módulo.
+
+📚 Documentación
+
+Manual de cada comando.
+
+🚀 Entregable
+
+LinuxOps ya sirve para consultar cualquier servidor.
+
+🚀 v0.3 - Monitoring
+🎯 Objetivo
+
+Diagnosticar problemas.
+
+📋 Funcionalidades
+
+Logs.
+
+Journalctl.
+
+Errores.
+
+Warnings.
+
+Fails.
+
+Servicios caídos.
+
+Uso de recursos.
+
+Alertas.
+
+Load Average.
+
+Conexiones.
+
+🧪 Pruebas
+
+Generar errores de prueba.
+
+Verificar filtros.
+
+📚 Documentación
+
+Ejemplos de diagnóstico.
+
+🚀 Entregable
+
+LinuxOps ayuda a encontrar problemas rápidamente.
+
+🚀 v0.4 - Administration
+🎯 Objetivo
+
+Administrar el servidor.
+
+📋 Funcionalidades
+
+Servicios.
+
+Restart.
+
+Start.
+
+Stop.
+
+Backups.
+
+Restaurar.
+
+Procesos.
+
+Archivos.
+
+🧪 Pruebas
+
+Crear servicio de prueba.
+
+Crear backup.
+
+Restaurar.
+
+📚 Documentación
+
+Administración segura.
+
+🚀 Entregable
+
+Administración básica del servidor.
+
+🚀 v0.5 - Security
+🎯 Objetivo
+
+Auditoría básica.
+
+📋 Funcionalidades
+
+Firewall.
+
+SSH.
+
+UID 0.
+
+Sudoers.
+
+Puertos.
+
+Permisos.
+
+SUID.
+
+SGID.
+
+Auditoría.
+
+🧪 Pruebas
+
+Detectar permisos inseguros.
+
+📚 Documentación
+
+Buenas prácticas.
+
+🚀 Entregable
+
+Revisión rápida de seguridad.
+
+🚀 v0.6 - Reports
+🎯 Objetivo
+
+Generar documentación automáticamente.
+
+📋 Funcionalidades
+
+Health Report.
+
+Inventory.
+
+Security Report.
+
+TXT.
+
+JSON.
+
+🧪 Pruebas
+
+Comparar reportes con la información real.
+
+📚 Documentación
+
+Formato de reportes.
+
+🚀 Entregable
+
+Reportes reutilizables.
+
+🚀 v0.7 - Polish
+🎯 Objetivo
+
+Preparar el proyecto para una primera versión estable.
+
+📋 Funcionalidades
+
+Optimización.
+
+Refactor.
+
+Validaciones.
+
+Mensajes.
+
+Mejoras visuales.
+
+Auto completado.
+
+🧪 Pruebas
+
+Probar en varias distribuciones Linux.
+
+📚 Documentación
+
+Actualización completa.
+
+🚀 Entregable
+
+Proyecto listo para producción.
+
+🚀 v1.0 - Stable
+🎯 Objetivo
+
+Publicar la primera versión oficial.
+
+📋 Funcionalidades
+
+No se agregan nuevas funcionalidades.
+
+Solo:
+
+Corrección de errores.
+Pruebas finales.
+Documentación final.
+Publicación en GitHub.
+🧪 Pruebas
+
+Pruebas completas de todos los módulos.
+
+📚 Documentación
+
+README definitivo.
+
+Wiki.
+
+Ejemplos.
+
+Capturas.
+
+🚀 Entregable
+
+Primera versión estable.
+
+Requisitos de entraga para cada version
+| Requisito                        | Obligatorio |
+| -------------------------------- | ----------- |
+| Código implementado              | ✅           |
+| Funciona correctamente           | ✅           |
+| Maneja errores                   | ✅           |
+| Tiene pruebas                    | ✅           |
+| Documentación actualizada        | ✅           |
+| README actualizado               | ✅           |
+| Changelog actualizado            | ✅           |
+| Commit realizado                 | ✅           |
+| Etiqueta (tag) de versión creada | ✅           |
+
+---------------------------------------------------
+depende lo que aprendas
+
+version 2 
+LinuxOps Toolkit v2.x - implementar docker cuando lo aprenda
+
+version 3
+LinuxOps Toolkit v3.x - integrarle ansible cuando aprenda
+
+version 4
+LinuxOps Toolkit v4.x   Kubernetes.
+
+version5
+LinuxOps Toolkit v5.x  terraform
+
+version 6
+LinuxOps Toolkit v6.x  cloud
+
