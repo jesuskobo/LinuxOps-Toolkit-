@@ -8,11 +8,16 @@ PROJECT_ROOT="$(cd "${BIN_DIR}/.." && pwd)"
 export PROJECT_ROOT
 
 # 2. Cargar las funciones a la memoria del programa
+# lib
 source "${PROJECT_ROOT}/lib/colors.sh"
 source "${PROJECT_ROOT}/lib/logger.sh"
 source "${PROJECT_ROOT}/lib/config.sh"
 source "${PROJECT_ROOT}/lib/utils.sh"
+source "${PROJECT_ROOT}/lib/validator.sh"
+
+#core
 source "${PROJECT_ROOT}/core/router.sh"
+source "${PROJECT_ROOT}/core/render_engine.sh"
 
 # 3. Leer las configuraciones iniciales
 load_configurations
