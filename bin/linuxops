@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# LinuxOps Toolkit - Punto de Entrada Principal
+
+# 1. Encontrar la carpeta raíz de nuestro proyecto
+BIN_DIR="$(dirname "${BASH_SOURCE[0]}")"
+PROJECT_ROOT="$(cd "${BIN_DIR}/.." && pwd)"
+
+export PROJECT_ROOT
+
+# 2. Cargar las funciones a la memoria del programa
+source "${PROJECT_ROOT}/lib/colors.sh"
+source "${PROJECT_ROOT}/lib/logger.sh"
+source "${PROJECT_ROOT}/lib/config.sh"
+source "${PROJECT_ROOT}/lib/utils.sh"
+source "${PROJECT_ROOT}/core/router.sh"
+
+# 3. Leer las configuraciones iniciales
+load_configurations
+
+# 4. Enviar los comandos del usuario al cerebro
+route_command "$@"

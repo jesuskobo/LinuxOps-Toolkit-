@@ -4,5 +4,18 @@
 .DS_Store
 ...
 
+# Registros de ejecución locales y reportes
+logs/*.log
+reports/*.txt
+reports/*.json
+reports/*.html
+
+# Mantener carpetas pero no su contenido
+!logs/.gitkeep
+!reports/.gitkeep
+
+
 # Reglas personalizadas para LinuxOps-Toolkit
-docs/ 
+docs/
+tests/tmp/
+.env
