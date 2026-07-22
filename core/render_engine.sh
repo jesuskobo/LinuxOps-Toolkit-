@@ -4,7 +4,7 @@
 render_status() {
     local component="$1"
     local value="$2"
-    local status="${3,,}" #convertir a minusculas
+    local status="$3" #convertir a minusculas
     local recommendation="$4"
 
     # 1. Seleccionar color según el estado ($status)
@@ -18,14 +18,14 @@ render_status() {
     fi
 
     # 2. Imprimir en pantalla el reporte estandarizado
-    printf "--------------------------------------------------\n"
-    printf "[ %s ] Estado: %s%s%s\n" "$component" "$status_color" "$status" "${RESET}"
+    printf '%s\n' "--------------------------------------------------"
+    printf "[ %s ] Estado: %b%s%b\n" "$component" "$status_color" "$status" "${NC}"
     printf "Uso actual: %s\n" "$value"
 
     # 3. Mostrar recomendación solo si el estado es WARNING o CRITICAL
     if [ "$status" != "OK" ] && [ -n "$recommendation" ]; then
-        printf "%s💡 Recomendación: %s%s\n" "${YELLOW}" "$recommendation" "${RESET}"
+        printf "%s💡 Recomendación: %s%s\n" "${YELLOW}" "$recommendation" "${NC}"
     fi
-    printf "--------------------------------------------------\n"
+    printf '%s\n' "--------------------------------------------------"
 
 }
