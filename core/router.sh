@@ -4,12 +4,13 @@
 route_command() {
     case "$1" in
         "system")
+            # Funciones dentro de Module/system
             case "$2" in
                 "cpu")                    
                     cpu_evaluate
                     ;;
                 "memory")
-                    echo "Iniciando memoria"
+                    memory_evaluate
                     ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"

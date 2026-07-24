@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # LinuxOps Toolkit - Módulo de CPU
 
+# Recoleccion de la informacion del sistema
 cpu_collect() {
     # 1. Modelo del procesador
     local model
@@ -31,6 +32,7 @@ cpu_collect() {
     echo "${model}|${cores}|${load_avg}|${usage}"
 }
 
+# Evaluarla y pasarla limpia al render
 cpu_evaluate() {
     local raw_data
     raw_data=$(cpu_collect)
@@ -46,9 +48,9 @@ cpu_evaluate() {
         log_error "Uso crítico de CPU: ${cpu_usage}%"
     elif [ "$cpu_usage" -ge "$CPU_WARN_THRESHOLD" ]; then
         status="WARNING"
-        log_warning "Uso elevado de CPU: ${cpu_usage}%"
+        log_warn "Uso elevado de CPU: ${cpu_usage}%"
     fi
 
     # Renderizar pantalla formateada
-    render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$CPU_REC"
+    render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$CPU_REC" # CPU_REC viene de recommendations.conf
 }

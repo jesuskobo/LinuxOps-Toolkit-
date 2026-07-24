@@ -17,14 +17,9 @@ render_cpu_screen() {
         status_color="${RED}"
     fi
 
-    # Generar la barra de progreso ASCII
-    local bar_length=20 # definir ancho de la barra de 20 bloques
-    local filled=$(( usage * bar_length / 100 )) #calculo para ver que bloques desben estar llenos
-    local empty=$(( bar_length - filled )) #Cálculo de la porción vacía
-    local bar=""
-
-    for ((i=0; i<filled; i++)); do bar="${bar}█"; done #concatena de manera iterativa el caracter de bloque sólido (█) tantas veces como indique la variable $filled.
-    for ((i=0; i<empty; i++)); do bar="${bar}░"; done #ejecuta inmediatamente después para rellenar los espacios restantes con el caracter sombreado claro (░) tantas veces como indique la variable $empty.
+    # Generar la barra de progreso ASCII (funcion en utils.py)
+    local bar
+    bar=$(bar_progress_ascii 20 "$usage")
 
     # Imprimir pantalla maquetada
     printf '====================================================================\n'
@@ -43,4 +38,41 @@ render_cpu_screen() {
     fi
 
     printf '====================================================================\n'
+}
+
+# "$memory_total" "$memory_usage" "$memory_available" "$memory_porcentage" "$memory_swaps" "$status"
+render_memory_screen(){
+    local total="$1"
+    local usage="$2"
+    local available="$3"
+    local usage_porcentage="$4"
+    local swap="$5"
+    local status="$6"
+    local rec="$7"
+
+    # Generar la barra de progreso ASCII (funcion en utils.py)
+    local bar
+    bar=$(bar_progress_ascii 20 "$usage_porcentage")
+
+    # seleccionar color segun estado
+    local status_color="${GREEN}"
+
+    printf '====================================================================\n'
+    printf ' RESULTADO: Estado de la Memoria RAM y SWAP\n'
+    printf '====================================================================\n'
+    printf ' Total RAM:                 %s\n' "$total GB"
+    printf ' RAM Usada:                 %s\n' "$usage GB"
+    printf ' RAM Disponible:            %s\n' "$available GB"
+    printf ' SWAP Usada/SWAP Total:     %s\n\n' "$swap GB"
+    printf ' Uso Actual Real:           [%b%s%b] %b%s%%%b (Estado: %b%s%b)\n\n' \
+        "$status_color" "$bar" "${NC}" \
+        "$status_color" "$usage_porcentage" "${NC}" \
+        "$status_color" "$status" "${NC}"
+    printf '%bNota: El "Uso Actual Real" excluye el caché del Kernel (buff/cache).%b\n' "${BOLD}" "${NC}"
+    printf '====================================================================\n'
+
+    # Condicional recomendaciones
+    if [ "$status" != "OK" ] && [ -n "$rec" ]; then
+        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
+    fi
 }

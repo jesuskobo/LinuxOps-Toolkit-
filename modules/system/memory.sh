@@ -1,28 +1,59 @@
 #!/usr/bin/env bash
 # LinuxOps Toolkit - Módulo de Memoria RAM
 
+# Recoleccion de la informacion del sistema
 memory_collect() {
-    # 1. Obtener valores crudos reales directamente desde el Kernel (en KB)
-    local total_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+    # 1. Capturar la salida de free -m una sola vez para evitar múltiples lecturas de disco
+    local free_output=$(free -m)
+
+    # 2. Extraer datos de la RAM (Línea 2)
+    local total_mb=$(echo "$free_output" | awk 'NR==2 {print $2}')
+    local used_mb=$(echo "$free_output" | awk 'NR==2 {print $3}')
+    local available_mb=$(echo "$free_output" | awk 'NR==2 {print $7}')
+
+    # Convertir a GB con 2 decimales usando awk (más rápido y seguro que bc)
+    local total_gb=$(awk -v t="$total_mb" 'BEGIN {printf "%.2f", t/1024}')
+    local usage_gb=$(awk -v u="$used_mb" 'BEGIN {printf "%.2f", u/1024}')
+    local available_gb=$(awk -v a="$available_mb" 'BEGIN {printf "%.2f", a/1024}')
     
-    # Obtener los KB usados y disponibles desde free
-    local usage_kb=$(free | awk 'NR==2 {print $3}')
-    local available_kb=$(free | awk 'NR==2 {print $7}')
+    # 3. Calcular porcentaje de uso real (Métrica limpia: used / total)
+    local usage_por=$(( (total_mb - available_mb) * 100 / total_mb )) 
 
-    # 2. Convertir los valores a GB con decimales usando bc
-    local total_gb=$(echo "scale=2; $total_kb / 1024 / 1024" | bc)
-    local usage_gb=$(echo "scale=2; $usage_kb / 1024 / 1024" | bc)
-    local available_gb=$(echo "scale=2; $available_kb / 1024 / 1024" | bc)
+    # 4. MEMORIA SWAP (Línea 3)
+    # Extraemos columna 2 (Total) y columna 3 (Usada)
+    local swap_total=$(echo "$free_output" | awk 'NR==3 {printf "%.2f", $2 / 1024}') 
+    local swap_used=$(echo "$free_output" | awk 'NR==3 {printf "%.2f", $3 / 1024}') 
 
-    # 3. CORRECCIÓN DEL PORCENTAJE:
-    # Multiplicamos por 100 primero y dejamos que bc calcule el entero sin decimales (scale=0)
-    local usage_por=$(echo "scale=0; ($usage_kb * 100) / $total_kb" | bc)
+    # Formato corregido: Usada / Total
+    local swap="${swap_used}/${swap_total}"
 
-    # 4. MEMORIA SWAP
-    # pendiente sacar total memoria swap y total usada
-
-    # 5. Retornar los datos limpios separados por espacios
-    echo "$total_gb" "$usage_gb" "$available_gb" "$usage_por"
+    # 5. Retornar datos limpios (Separados por pipe '|' SIN espacios internos corruptos)
+    echo "${total_gb}|${usage_gb}|${available_gb}|${usage_por}|${swap}"
 }
 
-memory_collect
+# Evaluarla y pasarla limpia al render
+memory_evaluate() {
+    local row_data
+    row_data=$(memory_collect)
+
+    # Descomponer los campos delimitados por pipe
+    local memory_total memory_usage memory_available memory_porcentage memory_swaps
+    IFS='|' read -r memory_total memory_usage memory_available memory_porcentage memory_swaps <<< "$row_data"
+
+
+    # Determinar estado según umbrales
+    local status="OK"
+
+    if [ "$memory_porcentage" -ge "$MEM_CRIT_THRESHOLD" ]; then
+        status="CRITICAL"
+        log_error "Uso critico de Memoria RAM: $memory_porcentage%"
+
+    elif [ "$memory_porcentage" -ge "$MEM_WARN_THRESHOLD" ]; then
+        status="WARNING"
+        log_warn "Uso de memoria elevado $memory_porcentage%"
+
+    fi
+    
+    render_memory_screen "$memory_total" "$memory_usage" "$memory_available" "$memory_porcentage" "$memory_swaps" "$status" "$MEM_REC" # MEM_REC viene de recommendations.conf
+
+}

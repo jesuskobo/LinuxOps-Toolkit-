@@ -21,13 +21,15 @@ source "${PROJECT_ROOT}/core/render_engine.sh"
 
 #Modulos
 source "${PROJECT_ROOT}/modules/system/cpu.sh"
+source "${PROJECT_ROOT}/modules/system/memory.sh"
+
 
 
 # 3. Leer las configuraciones iniciales
 load_configurations
 
-# 4. #Registro en el archivo log con severidad estandarizada
+# 4. #Registro en el archivo log con severidad estandarizada (Funciones en .conf)
 log_info "Framework LinuxOps-Toolkit v${APP_VERSION} inicializado exitosamente por el usuario $USER"
 
-# 5. Enviar los comandos del usuario al cerebro
+# 5. Enviar los comandos del usuario al cerebro (router.sh)
 route_command "$@"
