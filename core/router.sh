@@ -5,9 +5,11 @@ route_command() {
     case "$1" in
         "system")
             case "$2" in
-                "cpu")
-
+                "cpu")                    
                     cpu_evaluate
+                    ;;
+                "memory")
+                    echo "Iniciando memoria"
                     ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
@@ -18,10 +20,7 @@ route_command() {
             ;;
 
         "")
-            printf "${BLUE}${APP_NAME} v${APP_VERSION}${RESET}\n"
-            printf "${GREEN}Framework initialized successfully.${RESET}${NC}\n"
-
-            log_info "El sistema inicio correctamente"
+            show_banner
             ;;
         
         "help"|"-h"|"--help")
