@@ -15,6 +15,9 @@ route_command() {
                 "disk" | 3)
                     disk_evaluate
                     ;;
+                "network" | 4)
+                    network_evaluate
+                    ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
                     log_error "Error: subcomando $2 no reconocido"

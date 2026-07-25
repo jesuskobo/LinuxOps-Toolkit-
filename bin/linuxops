@@ -23,11 +23,12 @@ source "${PROJECT_ROOT}/core/render_engine.sh"
 source "${PROJECT_ROOT}/modules/system/cpu.sh"
 source "${PROJECT_ROOT}/modules/system/memory.sh"
 source "${PROJECT_ROOT}/modules/system/disk.sh"
+source "${PROJECT_ROOT}/modules/system/network.sh"
 
 
 
 
-# 3. Leer las configuraciones iniciales
+# 3. Leer las configuraciones iniciales (/lib/config)
 load_configurations
 
 # 4. #Registro en el archivo log con severidad estandarizada (Funciones en .conf)
