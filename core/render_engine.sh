@@ -40,7 +40,6 @@ render_cpu_screen() {
     printf '====================================================================\n'
 }
 
-# "$memory_total" "$memory_usage" "$memory_available" "$memory_porcentage" "$memory_swaps" "$status"
 render_memory_screen(){
     local total="$1"
     local usage="$2"
@@ -69,6 +68,43 @@ render_memory_screen(){
         "$status_color" "$usage_porcentage" "${NC}" \
         "$status_color" "$status" "${NC}"
     printf '%bNota: El "Uso Actual Real" excluye el caché del Kernel (buff/cache).%b\n' "${BOLD}" "${NC}"
+    printf '====================================================================\n'
+
+    # Condicional recomendaciones
+    if [ "$status" != "OK" ] && [ -n "$rec" ]; then
+        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
+    fi
+}
+
+# "$disk_total" "$disk_usage" "$disk_available" "$disk_usage_porc" "$disk_inode_porc" "$disk_dir_heavy" "$status" "$DISK_REC" 
+render_disk_screen() {
+    local total="$1"
+    local usage="$2"
+    local available="$3"
+    local usage_porcentage="$4"
+    local inode_porcentage="$5"
+    local dir_heavy=$6
+    local status="$7"
+    local rec="$8"
+
+    ## Generar la barra de progreso ASCII (funcion en utils.py)
+    local bar
+    bar=$(bar_progress_ascii 20 "$usage_porcentage")
+
+    # seleccionar color segun estado 
+    local status_color="${GREEN}"
+
+    printf '====================================================================\n'
+    printf ' RESULTADO: Estado del Almacenamiento y Discos\n'
+    printf '====================================================================\n\n'
+    printf ' Partición (/):          %s | %s | %s \n' "$total GB Totales" "$usage GB Usados" "$available GB Libres"
+    printf ' Uso de Disco:           [%b%s%b] %b%s%%%b (Estado: %b%s%b)\n' \
+        "$status_color" "$bar" "${NC}" \
+        "$status_color" "$usage_porcentage" "${NC}" \
+        "$status_color" "$status" "${NC}"
+
+    printf ' Inodos Usados:          %s\n' "$inode_porcentage"
+    printf ' Directorio Pesado:      %s\n\n' "$dir_heavy"
     printf '====================================================================\n'
 
     # Condicional recomendaciones

@@ -3,14 +3,17 @@
 
 route_command() {
     case "$1" in
-        "system")
+        "system" | 1)
             # Funciones dentro de Module/system
             case "$2" in
-                "cpu")                    
+                "cpu" | 1)                    
                     cpu_evaluate
                     ;;
-                "memory")
+                "memory" | 2)
                     memory_evaluate
+                    ;;
+                "disk" | 3)
+                    disk_evaluate
                     ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
@@ -19,6 +22,9 @@ route_command() {
                     ;;
             esac
             ;;
+
+        # Meter mas opciones
+
 
         "")
             show_banner

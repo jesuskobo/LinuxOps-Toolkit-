@@ -22,6 +22,8 @@ source "${PROJECT_ROOT}/core/render_engine.sh"
 #Modulos
 source "${PROJECT_ROOT}/modules/system/cpu.sh"
 source "${PROJECT_ROOT}/modules/system/memory.sh"
+source "${PROJECT_ROOT}/modules/system/disk.sh"
+
 
 
 
