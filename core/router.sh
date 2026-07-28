@@ -18,6 +18,9 @@ route_command() {
                 "network" | 4)
                     network_evaluate
                     ;;
+                "process" | 5)
+                    process_evaluate
+                    ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
                     log_error "Error: subcomando $2 no reconocido"

@@ -22,7 +22,7 @@ log_msg() {
 
 #Funciones auxiliares para organizar la entrada del LOG
 log_info() { 
-    local mensaje="$1"  # Dejamos claro qué es $1
+    local mensaje="$1"  
     log_msg "INFO" "$mensaje"
 }
 

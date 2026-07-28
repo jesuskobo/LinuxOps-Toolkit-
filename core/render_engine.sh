@@ -144,3 +144,74 @@ render_network_screen() {
         printf '%b Recomendación: %s%b\n\n' "${YELLOW}" "${rec}" "${NC}"
     fi
 }
+
+# "$process_cpu" "$process_mem" "$process_zombie" "$process_total" "$status_cpu" "$status_zombie" "$status_mem"
+render_process_screen() {
+    local p_cpu="$1"
+    local p_mem="$2"
+    local p_zombie="$3"
+    local p_total="$4"
+    local p_status_cpu="$5"
+    local p_status_zom="$6"
+    local p_status_mem="$7"
+
+    # Descomponer datos delimitados por pipe | de memoria cpu
+    local c_status c_rec z_status z_rec m_status m_rec
+    IFS='|' read -r c_status c_rec <<< "$p_status_cpu"
+    IFS='|' read -r z_status z_rec <<< "$p_status_zom"
+    IFS='|' read -r m_status m_rec <<< "$p_status_mem"
+
+
+    # Imprimir pantalla MaquetadaTotal Procesos Activos:
+    local status_color="${GREEN}"
+
+    printf '=========================================================================\n'
+    printf 'RESULTADO: Monitoreo de Procesos y Estado del Kernel\n'
+    printf '=========================================================================\n\n'
+    printf 'Total Procesos Activos:        %s\n' "$p_total"
+    printf 'Procesos Zombie:               %s %s\n\n' "$p_zombie" "(Estado: $z_status)"
+    printf 'Top Procesos por CPU: \n'
+    
+    # llamar funcion para agregar procesos de forma escalable
+    bucle_render "$p_cpu" "CPU"
+
+    printf '\nTop Procesos por MEMORIA: \n'
+
+    bucle_render "$p_mem" "RAM"
+
+    printf '\n'
+    printf '=========================================================================\n\n'
+    
+    # Recomendaciones si algún estado no es OK
+    if [ "$z_status" != "OK" ] && [ "$z_rec" != "N/A" ]; then
+        printf '%bRecomendación Zombie: %s%b\n' "${YELLOW}" "$z_rec" "${NC}"
+    fi
+    if [ "$c_status" != "OK" ] && [ "$c_rec" != "N/A" ]; then
+        printf '%bRecomendación CPU: %s%b\n' "${YELLOW}" "$c_rec" "${NC}"
+    fi
+    if [ "$m_status" != "OK" ] && [ "$z_status" != "N/A" ];then
+        printf '%bRecomendación RAM: %s%b\n\n' "${YELLOW}" "$m_rec" "${NC}"
+    fi
+}
+
+bucle_render() {
+    local data="$1"
+    local label="$2"
+    
+    # Convertir el string plano en un Array indexado de Bash
+    read -r -a elements <<< "$data"
+    local total=${#elements[@]} #Obtener el tamaño total de elementos dentro del array
+    local contador=1
+
+    for ((i=0; i<total; i+=3)); do
+        local pid="${elements[i]}"
+        local val="${elements[i+1]}"
+        local comm="${elements[i+2]}"
+        
+        [[ -z "$pid" ]] && continue
+
+        #Impresión con formato de rejilla fija (Alineación perfecta)
+        printf '   %d. %-15s (PID: %-6s) - %s%% %s\n' "$contador" "$comm" "$pid" "$val" "$label"
+        ((contador++))
+    done
+}
