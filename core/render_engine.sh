@@ -263,21 +263,22 @@ render_user_screen() {
     } | column -t
     )
 
+
     # Imprimir pantalla maquetada
-    printf '=========================================================================\n'
+    printf '=====================================================================================\n'
     printf 'RESULTADO: Auditoría de Usuarios y Sesiones del Sistema\n'
-    printf '=========================================================================\n\n'
+    printf '=====================================================================================\n\n'
     printf '[+] RESUMEN GENERAL:\n'
-    printf '%s''-------------------------------------------------------------------------\n'
+    printf '%s''-------------------------------------------------------------------------------------\n'
     printf 'Usuarios Logueados:        %s %s\n' "$contar_user" "($format_user)"
     printf 'Sesiones Activas:          %s\n' "$u_active_count (TTY/PTS en ejecución)"
     printf 'Usuarios Sudo/Wheel:       %s\n' "$u_admin_count usuarios con privilegios"
     printf 'Auditoría UID 0:           %s\n\n' "$u_uid_count Detectado"
     printf '[+] DETALLE DE SESIONES ACTIVAS:\n'
-    printf '%s''-------------------------------------------------------------------------\n'
+    printf '%s''-------------------------------------------------------------------------------------\n'
     printf '%s\n\n' "$format_info_sesion"
     printf '[+] USUARIOS CON PRIVILEGIOS DE ADMINISTRADOR (SUDO/WHEEL):\n'
-    printf '%s''-------------------------------------------------------------------------\n'
+    printf '%s''-------------------------------------------------------------------------------------\n'
     # Formatea salida con saltos de linea y numero de usuario
     contador_user_privi=1
     for usuario in ${u_privileged//;/ }; do
@@ -285,11 +286,17 @@ render_user_screen() {
         ((contador_user_privi++))
     done
     printf '\n[+] INTENTOS DE ACCESO FALLIDOS RECIENTES\n'
-    printf '%s''-------------------------------------------------------------------------\n'
+    printf '%s''-------------------------------------------------------------------------------------\n'
     printf '%s\n\n' "$format_log_fail"
-    printf '=========================================================================\n'
+    printf '=====================================================================================\n\n'
 
-    
+    # RECOMENDACIONES
+    local u_status=$(echo "$status" |cut -d'|' -f1)
+    local u_rec=$(echo "$status" |cut -d'|' -f2)
+
+    if [ "$u_status" != "OK" ] && [ "$u_rec" != "N/A" ];then
+        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$u_rec" "${NC}"
+    fi
 }
 
 
