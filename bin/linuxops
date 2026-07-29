@@ -26,6 +26,7 @@ source "${PROJECT_ROOT}/modules/system/disk.sh"
 source "${PROJECT_ROOT}/modules/system/network.sh"
 source "${PROJECT_ROOT}/modules/system/process.sh"
 source "${PROJECT_ROOT}/modules/system/users.sh"
+source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
 
 
 

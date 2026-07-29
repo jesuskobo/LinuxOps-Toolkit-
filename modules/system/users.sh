@@ -23,7 +23,7 @@ users_collect() {
     local u_sesion_fail=$(journalctl -u "sshd" --since "1 day ago" |grep -iE "Failed password|authentication failure"|tr 'A-Z' 'a-z')
     local u_log_info=$(format_log "$u_sesion_fail" |paste -sd';')
     
-
+    # servir datos con pipe
     echo "${u_loggers}|${u_activas}|${u_sudo}|${u_uid}|${u_info_sesion}|${u_privi}|${u_log_info}"
 
 }
@@ -32,6 +32,7 @@ users_evaluate() {
     local raw_data
     raw_data=$(users_collect)
 
+    # Descomponer datos con que vienen con pipe |
     local user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail
     IFS='|' read -r user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail <<< "$raw_data"
 
@@ -42,8 +43,9 @@ users_evaluate() {
     local session_status
     session_status=$(count_sesion "$user_log_fail")
 
+    # servir status y generar log
     case "$session_status" in
-
+        #si la sesion viene con WARNING  y un mensaje de Recomendatios.conf se sirve el status y se genera un log
         "WARNING|$USERS_WARNING_FAILED_LOGINS")
             status="$session_status"
             log_warn "Múltiples intentos fallidos de inicio de sesión detectados."
@@ -62,8 +64,7 @@ users_evaluate() {
         log_error "Se detectaron cuentas no-root con UID 0"
     fi
 
-    # echo "$user_privileged" 
-
+    # servir datos para renderizar
     render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status"
 
 }

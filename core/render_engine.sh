@@ -249,7 +249,7 @@ render_user_screen() {
     } | column -t
     )
 
-    # cambia ; por saltos de lineas y colocar encabezados
+    # cambia ; por saltos de lineas y coloca los encabezados
     format_log_fail=$(
     {
         printf "%-5s %-4s %-8s %-15s %-20s %-35s\n" \
@@ -288,4 +288,46 @@ render_user_screen() {
     printf '%s''-------------------------------------------------------------------------\n'
     printf '%s\n\n' "$format_log_fail"
     printf '=========================================================================\n'
+
+    
+}
+
+
+# RENDER DE SYSINFO
+# "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_entorno" "$status"
+render_sysinfo__screen(){
+    local s_hostname="$1"
+    local s_so="$2"
+    local s_kernel="$3"
+    local s_aquitec="$4"
+    local s_up_time="$5"
+    local s_around="$6"
+    local status="$7"
+
+    # Descomponer status
+    local s_status=$(echo "$status" |cut -d'|' -f1)
+    local s_rec=$(echo "$status" |cut -d'|' -f2)
+
+
+    # Imprimir pantalla maquetada
+    printf '=========================================================================\n'
+    printf 'RESULTADO: Información General del Sistema y Kernel\n'
+    printf '=========================================================================\n\n'
+    printf '[+] DATOS DEL HOST Y SISTEMA OPERATIVO\n'
+    printf '%s''-------------------------------------------------------------------------\n'
+    printf 'Hostname                   : %s\n' "$s_hostname"
+    printf 'Sistema Operativo          : %s\n' "$s_so"
+    printf 'Versión del Kernel         : %s\n' "$s_kernel"
+    printf 'Arquitectura               : %s\n\n' "$s_aquitec"
+    printf '[+] DATOS DEL HOST Y SISTEMA OPERATIVO\n'
+    printf '%s''-------------------------------------------------------------------------\n'
+    printf 'Uptime (Encendido)         : %s\n' "$s_up_time"
+    printf 'Tipo de Entorno            : %s\n' "$s_around"
+    printf 'Estado                     : %s\n\n' "$s_status"
+    printf '=========================================================================\n\n'
+
+    #Recomendaciones
+    if [ "$s_status" != "OK" ] && [ "$s_reco" != "N/A" ]; then
+        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$s_rec" "${NC}"
+    fi
 }

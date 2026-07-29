@@ -24,6 +24,9 @@ route_command() {
                 "users" | 6)
                     users_evaluate
                     ;;
+                "sysinfo" | 7)
+                    sysinfo_evaluate
+                    ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
                     log_error "Error: subcomando $2 no reconocido"
