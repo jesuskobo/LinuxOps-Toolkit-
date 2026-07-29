@@ -21,6 +21,9 @@ route_command() {
                 "process" | 5)
                     process_evaluate
                     ;;
+                "users" | 6)
+                    users_evaluate
+                    ;;
                 *)
                     printf "${RED}Error: subcomando $2 no reconocido\n"
                     log_error "Error: subcomando $2 no reconocido"
