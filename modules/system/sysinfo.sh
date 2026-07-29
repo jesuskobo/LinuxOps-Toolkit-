@@ -35,7 +35,7 @@ sysinfo_evaluate() {
 
     # Manejo de log  y status
     local status="OK"
-    if [ "$days" -ge 180 ];then
+    if [ "$days" -ge "$SYS_WARN_UPTIME_180DAYS_THRESHOLD" ];then
         status="WARNING|$SYS_WARNING_UPTIME_180DAYS"
         log_warn "El sistema lleva encendido $days días (Más de 180 días)"
     else
