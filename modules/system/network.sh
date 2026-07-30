@@ -65,5 +65,12 @@ network_evaluate() {
         log_error "Interfaz desconectada. No hay IP local ni puerta de enlace detectada."
     fi
 
+    # 4. --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        echo "$status|Direccion ip $network_ip_local"
+        return 0
+    fi
+
+
     render_network_screen "$network_target" "$network_ip_local" "$network_ip_public" "$network_internet" "$network_port_listen" "$status" "$recomendation"
 }

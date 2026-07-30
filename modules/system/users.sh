@@ -64,6 +64,12 @@ users_evaluate() {
         log_error "Se detectaron cuentas no-root con UID 0"
     fi
 
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        echo "$status"
+        return 0
+    fi
+
     # servir datos para renderizar
     render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status"
 

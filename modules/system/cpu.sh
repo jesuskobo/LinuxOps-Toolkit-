@@ -51,6 +51,13 @@ cpu_evaluate() {
         log_warn "Uso elevado de CPU: ${cpu_usage}%"
     fi
 
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ]; then
+        # Salida limpia para la Auditoría Consolidada (core/router.sh)
+        echo "${status}|Uso actual al ${cpu_usage}% (${cpu_cores} núcleos)"
+        return 0
+    fi
+
     # Renderizar pantalla formateada
     render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$CPU_REC" # CPU_REC viene de recommendations.conf
 }

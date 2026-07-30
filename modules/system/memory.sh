@@ -53,6 +53,12 @@ memory_evaluate() {
         log_warn "Uso de memoria elevado $memory_porcentage%"
 
     fi
+
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        echo "$status|RAM usada al $memory_porcentage% ($memory_available GB disponibles)"
+        return 0
+    fi
     
     render_memory_screen "$memory_total" "$memory_usage" "$memory_available" "$memory_porcentage" "$memory_swaps" "$status" "$MEM_REC" # MEM_REC viene de recommendations.conf
 

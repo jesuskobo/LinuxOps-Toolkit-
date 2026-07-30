@@ -61,6 +61,11 @@ process_evaluate() {
     status_mem=$(procces_evaluate_status "$mem_high" "$PROCESS_WARN_MEM_THRESHOLD"\
     "$PROCESS_CRIT_MEM_THRESHOLD" "$warn_msg_mem" "$crit_msg_mem" "$PROCESS_WARNING_MEM" "$PROCESS_CRITICAL_MEM")
 
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        echo "$status_zombie"
+        return 0
+    fi
 
     render_process_screen "$process_cpu" "$process_mem" "$process_zombie" "$process_total" "$status_cpu" "$status_zombie" "$status_mem"
 }

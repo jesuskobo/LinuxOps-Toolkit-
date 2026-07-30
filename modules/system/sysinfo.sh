@@ -42,5 +42,12 @@ sysinfo_evaluate() {
         status="OK|N/A"
     fi
 
-    render_sysinfo__screen "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_around" "$status"
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        local status_clean=$(echo "$status" |cut -d'|' -f1)
+        echo "$status_clean|$sys_hostname $sys_so"
+        return 0
+    fi
+
+    render_sysinfo_screen "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_around" "$status"
 }

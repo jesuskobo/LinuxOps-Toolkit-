@@ -34,5 +34,11 @@ disk_evaluate() {
         log_warn "Uso elevado de disco duro ${disk_usage_porc}%"
     fi
 
+    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
+    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
+        echo "${status}|Partición root (/) con $disk_usage_porc% de uso"
+        return 0
+    fi
+
     render_disk_screen "$disk_total" "$disk_usage" "$disk_available" "$disk_usage_porc" "$disk_inode_porc" "$disk_dir_heavy" "$status" "$DISK_REC" # Disk viene de recommendations.conf
 }
