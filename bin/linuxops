@@ -14,10 +14,13 @@ source "${PROJECT_ROOT}/lib/logger.sh"
 source "${PROJECT_ROOT}/lib/config.sh"
 source "${PROJECT_ROOT}/lib/utils.sh"
 source "${PROJECT_ROOT}/lib/validator.sh"
+source "${PROJECT_ROOT}/lib/progress.sh"
+source "${PROJECT_ROOT}/lib/recommendations.sh"
 
 #Core
 source "${PROJECT_ROOT}/core/router.sh"
 source "${PROJECT_ROOT}/core/render_engine.sh"
+source "${PROJECT_ROOT}/core/health_score.sh"
 
 #Modulos
 source "${PROJECT_ROOT}/modules/system/cpu.sh"

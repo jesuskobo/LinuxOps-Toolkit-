@@ -36,49 +36,61 @@ users_evaluate() {
     local user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail
     IFS='|' read -r user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail <<< "$raw_data"
 
-    # Estado por defecto
-    local status="OK|N/A"
+    # Estados
+    local status="OK"
+    local code="NONE"
 
-    # Intentos fallidos / Sesiones activas
-    local session_status
-    session_status=$(count_sesion "$user_log_fail")
+    # Detectar intentos fallidos / Sesiones activas
+    local code=$(count_sesion "$user_log_fail")
 
     # servir status y generar log
-    case "$session_status" in
-        #si la sesion viene con WARNING  y un mensaje de Recomendatios.conf se sirve el status y se genera un log
-        "WARNING|$USERS_WARNING_FAILED_LOGINS")
-            status="$session_status"
+    case "$code" in
+        # Setear el status segun el codigo optenido de count_sesion
+        USERS_FAILED_LOGINS)
+            status="WARNING"
             log_warn "Múltiples intentos fallidos de inicio de sesión detectados."
+            
         ;;
 
-        "WARNING|$USERS_WARNING_SESSIONS")
-            status="$session_status"
+        USERS_MANY_SESSIONS)
+            status="WARNING"
             log_warn "Alto número de sesiones TTY/PTS abiertas."
+            
         ;;
 
     esac
 
-    # Tiene mayor prioridad que WARNING
+    # Si hay usuarios con UID que sean diferente a user se pone status critical
     if (( user_uid_count > 1 )); then
-        status="CRITICAL|$USERS_CRITICAL_UID0"
+        status="CRITICAL"
+        code="USERS_UID0"
+        
         log_error "Se detectaron cuentas no-root con UID 0"
+        # cuentas no-root con UID 0
     fi
+
+    # Obtener recomendación detallada segun codigo enviado
+    local recommendation=$(get_recommendation "$code")
+
+    # Obtener recomendacion corta solo mensaje
+    local recommendation_msg=$(get_status_message "$code")
 
     # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$status"
+        echo "${status}|${recommendation_msg}"
         return 0
     fi
 
+    echo "$code"
     # servir datos para renderizar
-    render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status"
+    render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status" "$recommendation"
 
 }
 
 
 
 
-##FUNCIONES PRIVADAS DEL MODULO
+### FUNCIONES PRIVADAS DEL MODULO
 count_sesion() {
     # Logs recibidos desde users_collect().
     local log_fail="$1"
@@ -90,8 +102,7 @@ count_sesion() {
     # Fecha/hora actual en formato Epoch (segundos desde 1970). Facilita calcular diferencias de tiempo.
     local now=$(date +%s)
 
-    # El formato recibido es:registro1;registro2;registro3
-    # Se reemplaza ';' por saltos de línea para poder leerun registro a la vez con read.
+    # El formato recibido es:registro1;registro2;registro3 Se reemplaza ';' por saltos de línea para poder leerun registro a la vez con read.
     while read -r mes dia hora ip usuario motivo; do
 
         # Convierte:jul 07 11:02:20 a segundos Epoch.
@@ -115,19 +126,19 @@ count_sesion() {
 
     # Posible ataque de fuerza bruta.
     if (( failed >= 5 )); then
-        echo "WARNING|$USERS_WARNING_FAILED_LOGINS"
+        echo "USERS_FAILED_LOGINS" # codigo del status
         
     # Muchas sesiones abiertas.
     elif (( sesiones > 10 )); then
-        echo "WARNING|$USERS_WARNING_SESSIONS"
+        echo "USERS_MANY_SESSIONS" # codigo del status
         
     # Estado normal.
     else
-        echo "OK|N/A"
+        echo "NONE" # codigo del status
     fi
 }
 
-# Pendiente poner el if para authentication failure
+# Poner authentication failure si se desea
 format_log() {
     local log_failed=$1
     while read -r line; do

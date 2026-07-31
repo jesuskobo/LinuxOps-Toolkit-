@@ -233,6 +233,7 @@ render_user_screen() {
     local u_privileged="$6"
     local u_log_fail="$7"
     local status="$8"
+    local rec="$9"
 
     # Descomponer elementos
     # 1. Descomponer variable u_logger para contar usuarios y entregar datos formateado o separados por ,
@@ -250,14 +251,12 @@ render_user_screen() {
     )
 
     # cambia ; por saltos de lineas y coloca los encabezados
-    format_log_fail=$(
+    local format_log_fail=$(
     {
-        printf "%-5s %-4s %-8s %-15s %-20s %-35s\n" \
-            "MES" "DIA" "HORA" "IP" "USUARIO" "MOTIVO"
+        printf "%-5s %-4s %-8s %-15s %-20s %-35s\n" "MES" "DIA" "HORA" "IP" "USUARIO" "MOTIVO"
 
         while read -r mes dia hora ip usuario motivo; do
-            printf "%-5s %-4s %-8s %-15s %-20s %-35s\n" \
-                "$mes" "$dia" "$hora" "$ip" "$usuario" "$motivo"
+            printf "%-5s %-4s %-8s %-15s %-20s %-35s\n" "$mes" "$dia" "$hora" "$ip" "$usuario" "$motivo"
         done < <(tr ';' '\n' <<< "$u_log_fail")
 
     } | column -t
@@ -291,18 +290,15 @@ render_user_screen() {
     printf '=====================================================================================\n\n'
 
     # RECOMENDACIONES
-    local u_status=$(echo "$status" |cut -d'|' -f1)
-    local u_rec=$(echo "$status" |cut -d'|' -f2)
-
-    if [ "$u_status" != "OK" ] && [ "$u_rec" != "N/A" ];then
-        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$u_rec" "${NC}"
+    if [ "$status" != "OK" ] && [ "$rec" != "N/A" ];then
+        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
     fi
 }
 
 
 # RENDER DE SYSINFO
 # "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_entorno" "$status"
-render_sysinfo__screen(){
+render_sysinfo_screen(){
     local s_hostname="$1"
     local s_so="$2"
     local s_kernel="$3"
@@ -337,4 +333,65 @@ render_sysinfo__screen(){
     if [ "$s_status" != "OK" ] && [ "$s_reco" != "N/A" ]; then
         printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$s_rec" "${NC}"
     fi
+}
+
+
+# RENDER DE full audit screen
+# $base_score" "$global_status" "$count_ok" "$count_warn" "$count_crit"
+render_full_audit_screen() {
+    local raw_data_status="$1"
+    local raw_data_rec="$2"
+
+    # 1. Descomponer datos del status.
+    local f_score_global f_global_status f_count_ok f_count_warn f_count_crit
+    IFS='|' read -r f_score_global f_global_status f_count_ok f_count_warn f_count_crit <<< "$raw_data_status"
+
+    # 2. Descomponer datos de recomendaciones.
+
+
+    # 3. Generar la barra de progreso ASCII (funcion en utils.py)
+    local bar
+    bar=$(bar_progress_ascii 20 "$f_score_global")
+
+    # 4. Manejar colores de los status
+
+    local status_color="${GREEN}"
+    if [ "$f_global_status" == "CRITICAL" ]; then
+        status_color="${RED}"
+
+    elif [ "$f_global_status" == "WARNING" ]; then
+        status_color="${YELLOW}"
+    else
+        status_color="${GREEN}"
+    fi
+
+    # renderizar estado y recomendacion de (ram, disk, cpu etc)
+    local format_audit_reco=$( 
+    {
+        
+        while read -r line;do
+            local subsistema estado hallazgo
+            IFS='|' read -r subsistema estado hallazgo <<< "$line"
+
+            printf "%-15s %-15s %-35s\n" "$subsistema" "$estado" "$hallazgo"
+
+        done < <(tr ';' '\n' <<< "$raw_data_rec")
+    }
+    )
+
+    # Imprimir pantalla maquetada
+    printf '=========================================================================\n'
+    printf '        LINUXOPS TOOLKIT - AUDITORÍA EJECUTIVA DEL SISTEMA\n'
+    printf '=========================================================================\n\n'
+    printf '[+] HEALTH SCORE GLOBAL         : %s %s %s\n' "[$bar]" "$f_score_global %" "(Estado: $f_global_status)"
+    printf '[+] RESUMEN DE SALUD            : %s | %s | %s\n\n' "$f_count_ok OK" "$f_count_warn WARNING" "$f_count_crit CRITICAL"
+    printf '%s''-------------------------------------------------------------------------\n'
+    printf "%-15s %-15s %-35s\n" "SUBSISTEMA" "ESTADO" "HALLAZGO_PRINCIPAL" 
+    printf '%s''-------------------------------------------------------------------------\n'
+    printf '%s\n' "$format_audit_reco"
+    printf '=========================================================================\n'
+
+    
+    # echo "$raw_data_rec"
+    
 }
