@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # LinuxOps Toolkit - Módulo de procesos
 
-process_collect() {
+test_process_collect() {
     # 1. Consulta única de todos los procesos del sistema.
     local consult_process
     consult_process=$(ps -eo pid,%cpu,%mem,comm,stat --sort=-%cpu)
@@ -30,7 +30,7 @@ process_collect() {
 
 }
 
-process_evaluate() {
+test_process_evaluate() {
     # =======================
     # Recolección de métricas
     # =======================

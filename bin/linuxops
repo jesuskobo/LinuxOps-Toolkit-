@@ -17,12 +17,12 @@ source "${PROJECT_ROOT}/lib/validator.sh"
 source "${PROJECT_ROOT}/lib/progress.sh"
 source "${PROJECT_ROOT}/lib/recommendations.sh"
 
-#Core
+# Core
 source "${PROJECT_ROOT}/core/router.sh"
 source "${PROJECT_ROOT}/core/render_engine.sh"
 source "${PROJECT_ROOT}/core/health_score.sh"
 
-#Modulos
+# Modulos
 source "${PROJECT_ROOT}/modules/system/cpu.sh"
 source "${PROJECT_ROOT}/modules/system/memory.sh"
 source "${PROJECT_ROOT}/modules/system/disk.sh"
@@ -31,6 +31,8 @@ source "${PROJECT_ROOT}/modules/system/process.sh"
 source "${PROJECT_ROOT}/modules/system/users.sh"
 source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
 
+# TEST
+source "${PROJECT_ROOT}/tests/test_process.sh"
 
 
 

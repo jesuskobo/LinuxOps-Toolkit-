@@ -383,7 +383,7 @@ render_full_audit_screen() {
     printf '=========================================================================\n'
     printf '        LINUXOPS TOOLKIT - AUDITORÍA EJECUTIVA DEL SISTEMA\n'
     printf '=========================================================================\n\n'
-    printf '[+] HEALTH SCORE GLOBAL         : %s %s %s\n' "[$bar]" "$f_score_global %" "(Estado: $f_global_status)"
+    printf '[+] HEALTH SCORE GLOBAL         : %b%s %s %s%b\n' "$status_color" "[$bar]" "$f_score_global %" "(Estado: $f_global_status)" "${NC}"
     printf '[+] RESUMEN DE SALUD            : %s | %s | %s\n\n' "$f_count_ok OK" "$f_count_warn WARNING" "$f_count_crit CRITICAL"
     printf '%s''-------------------------------------------------------------------------\n'
     printf "%-15s %-15s %-35s\n" "SUBSISTEMA" "ESTADO" "HALLAZGO_PRINCIPAL" 
