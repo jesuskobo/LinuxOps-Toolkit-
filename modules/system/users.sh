@@ -61,6 +61,7 @@ users_evaluate() {
     esac
 
     # Si hay usuarios con UID que sean diferente a user se pone status critical
+    # user_uid_count=10 #debug
     if (( user_uid_count > 1 )); then
         status="CRITICAL"
         code="USERS_UID0"
@@ -77,11 +78,10 @@ users_evaluate() {
 
     # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "${status}|${recommendation_msg}"
+        echo "${status}|${recommendation_msg}|$code"
         return 0
     fi
 
-    echo "$code"
     # servir datos para renderizar
     render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status" "$recommendation"
 

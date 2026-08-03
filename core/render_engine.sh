@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # LinuxOps Toolkit  - Renderizado En Terminal
 
-# RENDER CPU
+# 1. RENDER CPU
 render_cpu_screen() {
     local model="$1"
     local cores="$2"
@@ -82,7 +82,7 @@ render_memory_screen(){
     fi
 }
 
-# RENDER DE DISCO DURO
+# 3. RENDER DE DISCO DURO
 
 render_disk_screen() {
     local total="$1"
@@ -122,7 +122,7 @@ render_disk_screen() {
 }
 
 
-# RENDER DE RED
+# 4. RENDER DE RED
 render_network_screen() {
     local network="$1"
     local ip_local="$2"
@@ -150,7 +150,7 @@ render_network_screen() {
     fi
 }
 
-# RENDER DE PROCESOS
+# 5. RENDER DE PROCESOS
 
 render_process_screen() {
     local p_cpu="$1"
@@ -222,7 +222,7 @@ bucle_render() {
     done
 }
 
-# RENDER DE USUARIOS
+# 6. RENDER DE USUARIOS
 #"$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status"
 render_user_screen() {
     local u_logger="$1"
@@ -296,7 +296,7 @@ render_user_screen() {
 }
 
 
-# RENDER DE SYSINFO
+# 7. RENDER DE SYSINFO 
 # "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_entorno" "$status"
 render_sysinfo_screen(){
     local s_hostname="$1"
@@ -306,12 +306,9 @@ render_sysinfo_screen(){
     local s_up_time="$5"
     local s_around="$6"
     local status="$7"
+    local rec="$8"
 
-    # Descomponer status
-    local s_status=$(echo "$status" |cut -d'|' -f1)
-    local s_rec=$(echo "$status" |cut -d'|' -f2)
-
-
+    
     # Imprimir pantalla maquetada
     printf '=========================================================================\n'
     printf 'RESULTADO: Información General del Sistema y Kernel\n'
@@ -326,21 +323,22 @@ render_sysinfo_screen(){
     printf '%s''-------------------------------------------------------------------------\n'
     printf 'Uptime (Encendido)         : %s\n' "$s_up_time"
     printf 'Tipo de Entorno            : %s\n' "$s_around"
-    printf 'Estado                     : %s\n\n' "$s_status"
+    printf 'Estado                     : %s\n\n' "$status"
     printf '=========================================================================\n\n'
 
     #Recomendaciones
-    if [ "$s_status" != "OK" ] && [ "$s_reco" != "N/A" ]; then
-        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$s_rec" "${NC}"
+    if [ "$status" != "OK" ] && [ "$rec" != "N/A" ]; then
+        printf '%bRecomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
     fi
 }
 
 
-# RENDER DE full audit screen
+# 8. RENDER DE full audit screen
 # $base_score" "$global_status" "$count_ok" "$count_warn" "$count_crit"
 render_full_audit_screen() {
     local raw_data_status="$1"
     local raw_data_rec="$2"
+    local raw_data_rec_long="$3"
 
     # 1. Descomponer datos del status.
     local f_score_global f_global_status f_count_ok f_count_warn f_count_crit
@@ -390,8 +388,34 @@ render_full_audit_screen() {
     printf '%s''-------------------------------------------------------------------------\n'
     printf '%s\n' "$format_audit_reco"
     printf '=========================================================================\n'
-
     
-    # echo "$raw_data_rec"
+    # RECOMENDACIONES DE SUBSISTEMAS
+    
+    # bucle para recorrer cada linea de raw_data_rec_long y mostrar solo las recomendaciones que no sean de prioridad baja (LOW)
+    local header_printed=false
+    while read -r line;do
+
+        [[ -z "$line" ]] && continue
+
+        local priority module recommendation
+        IFS='|' read -r priority module recommendation <<< "$line"
+        
+        # Omitir recomendaciones LOW
+        [[ "$priority" == "🟢 [LOW]" ]] && continue
+
+        # Imprimir encabezado una sola vez
+        if [ "$header_printed" = false ]; then
+            printf '\n\n[+] RECOMENDACIONES DE SUBSISTEMAS:\n'
+            printf '%s\n' '-------------------------------------------------------------------------'
+            printf "%-15s %-15s %-35s\n" "SUBSISTEMA" "MODULO" "RECOMENDACION"
+            printf '%s\n' '-------------------------------------------------------------------------'
+
+            header_printed=true
+        fi
+
+        printf '%b%-15s %-15s %s%b\n\n' "${YELLOW}" "$priority" "$module" "$recommendation" "${NC}"
+
+    done < <(tr ';' '\n' <<<  "$raw_data_rec_long")
+    
     
 }

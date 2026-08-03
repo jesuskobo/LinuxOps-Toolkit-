@@ -80,7 +80,7 @@ process_evaluate() {
     # Salida silenciosa (consumida por la auditoría ejecutiva)
     # -------------------------------------------------------------------------
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$z_status|${zombie_recommendation_msg}"
+        echo "$z_status|${zombie_recommendation_msg}|${z_code}"
         return 0
     fi
 
@@ -164,7 +164,7 @@ evaluate_threshold() {
     local warn_code="$4"    # Código a devolver si el valor supera WARNING.
     local crit_code="$5"    # Código a devolver si el valor supera CRITICAL.
 
-    # value=30 # Eliminar valor fijo utilizado durante pruebas.
+    # value=100 # Eliminar valor fijo utilizado durante pruebas.
 
     # Si valor >= umbral crítico.
     if (( value >= crit )); then

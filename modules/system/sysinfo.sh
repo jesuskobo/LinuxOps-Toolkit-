@@ -33,21 +33,24 @@ sysinfo_evaluate() {
     # Obtiene los dias totales
     local days=$((segundos / 86400))
 
-    # Manejo de log  y status
+    # Manejo de log recomendacion y status
     local status="OK"
+    local recommendation_sysinfo="NONE"
+
     if [ "$days" -ge "$SYS_WARN_UPTIME_180DAYS_THRESHOLD" ];then
-        status="WARNING|$SYS_WARNING_UPTIME_180DAYS"
-        log_warn "El sistema lleva encendido $days días (Más de 180 días)"
+        status="WARNING"
+        recommendation_sysinfo="$SYS_WARNING_UPTIME_180DAYS"
+        log_warn "El sistema lleva encendido $days días (Más de |$SYS_WARNING_UPTIME_180DAYS180 días)"
     else
-        status="OK|N/A"
+        status="OK"
+        recommendation_sysinfo="NONE"
     fi
 
     # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        local status_clean=$(echo "$status" |cut -d'|' -f1)
-        echo "$status_clean|$sys_hostname $sys_so"
+        echo "$status|$sys_hostname $sys_so|$recommendation_sysinfo"
         return 0
     fi
 
-    render_sysinfo_screen "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_around" "$status"
+    render_sysinfo_screen "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_around" "$status" "$recommendation_sysinfo"
 }

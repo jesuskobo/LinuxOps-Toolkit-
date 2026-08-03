@@ -26,19 +26,26 @@ disk_evaluate() {
 
     #determinar estado segun umbral
     local status="OK"
+    local recommendation_disk="$DISK_REC"
+
     if [ "$disk_usage_porc" -ge "$DISK_CRIT_THRESHOLD" ]; then
         status="CRITICAL"
+        recommendation_disk="$DISK_CRIT_REC"
         log_error "Uso crítico de Disco Duro: ${disk_usage_porc}%"
     elif [ "$disk_usage_porc" -ge "$DISK_WARN_THRESHOLD" ]; then
         status="WARNING"
+        recommendation_disk="$DISK_WARN_REC"
         log_warn "Uso elevado de disco duro ${disk_usage_porc}%"
+    else
+        status="OK"
+        recommendation_disk="NONE"
     fi
 
     # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "${status}|Partición root (/) con $disk_usage_porc% de uso"
+        echo "${status}|Partición root (/) con $disk_usage_porc% de uso|${recommendation_disk}"
         return 0
     fi
 
-    render_disk_screen "$disk_total" "$disk_usage" "$disk_available" "$disk_usage_porc" "$disk_inode_porc" "$disk_dir_heavy" "$status" "$DISK_REC" # Disk viene de recommendations.conf
+    render_disk_screen "$disk_total" "$disk_usage" "$disk_available" "$disk_usage_porc" "$disk_inode_porc" "$disk_dir_heavy" "$status" "$recommendation_disk" # Disk viene de recommendations.conf
 }

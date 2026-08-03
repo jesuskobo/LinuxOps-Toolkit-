@@ -43,21 +43,28 @@ cpu_evaluate() {
 
     # Determinar estado según umbrales
     local status="OK"
+    local recommendation_cpu="$CPU_REC" # CPU_REC viene de recommendations.conf
+
     if [ "$cpu_usage" -ge "$CPU_CRIT_THRESHOLD" ]; then
         status="CRITICAL"
+        recommendation_cpu="$CPU_CRIT_REC" # CPU_CRIT_REC viene de recommendations.conf
         log_error "Uso crítico de CPU: ${cpu_usage}%"
     elif [ "$cpu_usage" -ge "$CPU_WARN_THRESHOLD" ]; then
         status="WARNING"
+        recommendation_cpu="$CPU_WARN_REC" # CPU_WARN_REC viene de recommendations.conf
         log_warn "Uso elevado de CPU: ${cpu_usage}%"
+    else
+        status="OK"
+        recommendation_cpu="NONE"
     fi
 
     # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ]; then
         # Salida limpia para la Auditoría Consolidada (core/router.sh)
-        echo "${status}|Uso actual al ${cpu_usage}% (${cpu_cores} núcleos)"
+        echo "${status}|Uso actual al ${cpu_usage}% (${cpu_cores} núcleos)|${recommendation_cpu}"
         return 0
     fi
 
     # Renderizar pantalla formateada
-    render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$CPU_REC" # CPU_REC viene de recommendations.conf
+    render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$recommendation_cpu" # CPU_REC viene de recommendations.conf
 }

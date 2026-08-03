@@ -21,6 +21,7 @@ source "${PROJECT_ROOT}/lib/recommendations.sh"
 source "${PROJECT_ROOT}/core/router.sh"
 source "${PROJECT_ROOT}/core/render_engine.sh"
 source "${PROJECT_ROOT}/core/health_score.sh"
+source "${PROJECT_ROOT}/core/evaluator_engine.sh"
 
 # Modulos
 source "${PROJECT_ROOT}/modules/system/cpu.sh"

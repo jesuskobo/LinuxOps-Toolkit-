@@ -44,7 +44,7 @@ network_evaluate() {
 
     # Determinar estados
     local status="N/A"
-    local recomendation="N/A" #obtiene valores del archivo config/recommendations.confi
+    local recommendation_network="NONE" #obtiene valores del archivo config/recommendations.confi
 
     # 1. Si hay IP local y conectividad a internet
     if [ "$network_ip_local" != "N/A" ] && [ "$network_internet" = "ONLINE" ] >/dev/null; then
@@ -54,23 +54,23 @@ network_evaluate() {
     # 2. Si hay IP local pero NO responde a internet
     elif [ "$network_ip_local" != "N/A" ] && [ "$network_internet" = "OFFLINE" ];then
         status="WARNING"
-        recomendation="$NETWORK_WARNING"
+        recommendation_network="$NETWORK_WARNING"
         log_warn "Conectado a la red local ($network_ip_local), pero sin salida a internet"
         
 
     # 3. Si no hay IP local ni interfaz predeterminada
     else
         status="CRITICAL"
-        recomendation="$NETWORK_CRITICAL"
+        recommendation_network="$NETWORK_CRITICAL"
         log_error "Interfaz desconectada. No hay IP local ni puerta de enlace detectada."
     fi
 
     # 4. --- CONTROL DE SALIDA PARALELA PARA manejar status ---
     if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$status|Direccion ip $network_ip_local"
+        echo "${status}|Direccion ip $network_ip_local|${recommendation_network}"
         return 0
     fi
 
 
-    render_network_screen "$network_target" "$network_ip_local" "$network_ip_public" "$network_internet" "$network_port_listen" "$status" "$recomendation"
+    render_network_screen "$network_target" "$network_ip_local" "$network_ip_public" "$network_internet" "$network_port_listen" "$status" "$recommendation_network"
 }
