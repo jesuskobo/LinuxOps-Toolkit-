@@ -6,28 +6,45 @@ route_command() {
         "system" | 1)
             # Funciones dentro de Module/system
             case "$2" in
-                "cpu" | 1)                    
-                    cpu_evaluate
-                    # cpu_evaluate --silent 
+                "cpu" | 1)  
+                    # Ejecutar la función de evaluación de CPU y capturar su salida
+                    local output_cpu
+                    output_cpu=$(cpu_evaluate)
+
+                    # Llamar a la función de renderizado de CPU con la salida capturada
+                    render_cpu_screen "$output_cpu"
+
                     ;;
                 "memory" | 2)
-                    memory_evaluate
+                    local output_mem
+                    output_mem=$(memory_evaluate)
+                    render_memory_screen "$output_mem"
                     ;;
                 "disk" | 3)
                     echo "Revisando almacenamiento por favor espere.."
-                    disk_evaluate
+                    local output_disk
+                    output_disk=$(disk_evaluate)
+                    render_disk_screen "$output_disk"
                     ;;
                 "network" | 4)
-                    network_evaluate
+                    local output_net
+                    output_net=$(network_evaluate)
+                    render_network_screen "$output_net"
                     ;;
                 "process" | 5)
-                    process_evaluate
+                    local output_proc
+                    output_proc=$(process_evaluate)
+                    render_process_screen "$output_proc"
                     ;;
                 "users" | 6)
-                    users_evaluate
+                    local output_users
+                    output_users=$(users_evaluate)
+                    render_user_screen "$output_users"
                     ;;
                 "sysinfo" | 7)
-                    sysinfo_evaluate
+                    local output_sysinfo
+                    output_sysinfo=$(sysinfo_evaluate)
+                    render_sysinfo_screen "$output_sysinfo"
                     ;;
                 "all" | "audit" | 8)
                     run_full_system_audit
@@ -62,61 +79,82 @@ run_full_system_audit(){
     echo "Recopilando información del sistema y evaluando el estado..."
 
     # 1. Ejecutamos cada módulo y guardamos su salida completa en variables
-    local res_sysinfo=$(sysinfo_evaluate --silent)
-    local res_cpu=$(cpu_evaluate --silent)
-    local res_mem=$(memory_evaluate --silent)
-    local res_disk=$(disk_evaluate --silent)
-    local res_net=$(network_evaluate --silent)
-    local res_proc=$(process_evaluate --silent)
-    local res_users=$(users_evaluate --silent)
 
-    # 2. Extraemos SOLO el estado (OK / WARNING / CRITICAL) para el cálculo matemático
-    local st_sysinfo=$(echo "$res_sysinfo" |cut -d'|' -f1)
-    local st_cpu=$(echo "$res_cpu" |cut -d'|' -f1)
-    local st_mem=$(echo "$res_mem" |cut -d'|' -f1)
-    local st_disk=$(echo "$res_disk" |cut -d'|' -f1)
-    local st_net=$(echo "$res_net" |cut -d'|' -f1)
-    local st_proc=$(echo "$res_proc" |cut -d'|' -f1)
-    local st_users=$(echo "$res_users" |cut -d'|' -f1)
+    # Descomponer los campos delimitados por pipe para SYSINFO
+    local res_sysinfo=$(sysinfo_evaluate)
+    local sys_hostname sys_so sys_kernel sys_arquit sys_up_time sys_around sys_status sys_rec
+    IFS='|' read -r sys_hostname sys_so sys_kernel sys_arquit sys_up_time sys_around sys_status sys_rec <<< "$res_sysinfo"
+
+
+    # Descomponer los campos delimitados por pipe para CPU
+    # "${cpu_model}|${cpu_cores}|${cpu_load}|${cpu_usage}|${status}|${recommendation_cpu}"
+    local res_cpu=$(cpu_evaluate)
+    local cpu_model cpu_cores cpu_load cpu_usage cpu_status cpu_rec
+    IFS='|' read -r cpu_model cpu_cores cpu_load cpu_usage cpu_status cpu_rec <<< "$res_cpu"
+
+    # Descomponer los campor delimitados por pipe para MEMORIA RAM
+    local res_mem=$(memory_evaluate)
+    local memory_total memory_usage memory_available memory_porcentage memory_swaps memory_status memory_rec
+    IFS='|' read -r memory_total memory_usage memory_available memory_porcentage memory_swaps memory_status memory_rec <<< "$res_mem"
+
+    # Descomponer los campos delimitados por pipe para DISCO
+    local res_disk=$(disk_evaluate)
+    local disk_total disk_usage disk_available disk_usage_porc disk_inode_porc disk_dir_heavy disk_status disk_rec
+    IFS='|' read -r disk_total disk_usage disk_available disk_usage_porc disk_inode_porc disk_dir_heavy disk_status disk_rec <<< "$res_disk"
+
+
+    # Descomponer los campos delimitados por pipe para RED
+    local res_net=$(network_evaluate)
+    local network_target network_ip_local network_ip_public network_internet network_port_listen net_status net_rec
+    IFS='|' read -r network_target network_ip_local network_ip_public network_internet network_port_listen net_status net_rec <<< "$res_net"
+
+    # Descomponer los campos delimitados por pipe para PROCESOS
+    local res_proc=$(process_evaluate)
+    local proc_cpu proc_mem proc_zombie proc_total proc_z_status proc_z_recommendation_msg proc_z_code proc_cpu_status proc_cpu_recommendation_msg proc_cpu_code proc_m_status proc_m_recommendation_msg proc_m_code
+    IFS='|' read -r proc_cpu proc_mem proc_zombie proc_total proc_z_status proc_z_recommendation_msg proc_z_code proc_cpu_status proc_cpu_recommendation_msg proc_cpu_code proc_m_status proc_m_recommendation_msg proc_m_code <<< "$res_proc"
+
+
+    # Descomponer los campos delimitados por pipe para USUARIOS
+    local res_users=$(users_evaluate)
+    local user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail user_status user_recommendation_msg user_code
+    IFS='|' read -r user_loggers user_active_count user_admin_count user_uid_count user_info_sessions user_privileged user_log_fail user_status user_recommendation_msg user_code <<< "$res_users"
+
 
     # 3. Calculamos la salud matemática enviando las 7 palabras de estado
-    local health_data=$(calculate_health_score "$st_sysinfo" "$st_cpu" "$st_mem" "$st_disk" "$st_net" "$st_proc" "$st_users")
+    local health_data=$(calculate_health_score "$sys_status" "$cpu_status" "$memory_status" "$disk_status" "$net_status" "$proc_z_status" "$user_status")
 
     # 4. Construimos la recomendacion obtenida
     # tabla de recomendacion con su proceso y estado ej: SYSINFO|OK|revisar info del kernel;cpu|warning|revisar consumo cpu
     local table_recom_msg
-    table_recom_msg="SYSINFO|$st_sysinfo|$(echo "$res_sysinfo" | cut -d'|' -f2);"
-    table_recom_msg+="CPU|$st_cpu|$(echo $res_cpu | cut -d'|' -f2);"
-    table_recom_msg+="MEMORIA|$st_mem|$(echo $res_mem | cut -d'|' -f2);"
-    table_recom_msg+="DISCO|$st_disk|$(echo $res_disk | cut -d'|' -f2);"
-    table_recom_msg+="RED|$st_net|$(echo $res_net | cut -d'|' -f2);"
-    table_recom_msg+="PROCESOS|$st_proc|$(echo $res_proc |cut -d'|' -f2);"
-    table_recom_msg+="USUARIOS|$st_users|$(echo $res_users |cut -d'|' -f2)"
+    table_recom_msg="SYSINFO|$sys_status|$sys_hostname $sys_so;"
+    table_recom_msg+="CPU|$cpu_status|uso actual al ${cpu_usage}% (${cpu_cores} núcleos)|${cpu_rec};"
+    table_recom_msg+="MEMORIA|$memory_status|RAM usada al $memory_porcentage% ($memory_available GB disponibles);"
+    table_recom_msg+="DISCO|$disk_status|Partición root (/) con $disk_usage_porc% de uso;"
+    table_recom_msg+="RED|$net_status|Direccion ip $network_ip_local;"
+    table_recom_msg+="PROCESOS|$proc_z_status|$proc_z_recommendation_msg;"
+    table_recom_msg+="USUARIOS|$user_status|$user_recommendation_msg"
 
     # 5. Scaremos MODULOS|ESTADO|RECOMENDACION; para cada modulo, y luego lo pasamos a build_advice_table para que nos devuelva una tabla con el formato:
     # PRIORIDAD|MODULO|RECOMENDACION
-
     # ATENCION!! para recomendaciones del modulo de procesos y usuarios, toca estraerlo del archivo recommendations.sh 
     # ya que estos modulos no tienen una recomendacion fija, sino que depende del codigo de estado que se genere en la evaluacion de cada modulo
     # para el resto de modulos, la recomendacion es fija y se encuentra en recommendations.conf, por lo que se puede extraer directamente de ahi
     
-    
     local table_recom_long
     # Para modulos con recomendacion fija
-    table_recom_long="SYSINFO|$st_sysinfo|$(echo "$res_sysinfo"|cut -d'|' -f3);"
-    table_recom_long+="CPU|$st_cpu|$(echo "$res_cpu"|cut -d'|' -f3);"
-    table_recom_long+="MEMORIA|$st_mem|$(echo "$res_mem"|cut -d'|' -f3);"
-    table_recom_long+="DISCO|$st_disk|$(echo "$res_disk"|cut -d'|' -f3);"
-    table_recom_long+="RED|$st_net|$(echo "$res_net"|cut -d'|' -f3);"
+    # corregidos
+    table_recom_long="SYSINFO|$sys_status|$sys_rec;"
+    table_recom_long+="CPU|$cpu_status|$cpu_rec;"
+    table_recom_long+="MEMORIA|$memory_status|$memory_rec;"
+    table_recom_long+="DISCO|$disk_status|$disk_rec;"
+    table_recom_long+="RED|$net_status|$net_rec;"
     # para modulos con recomendacion variable (procesos y usuarios), se obtiene la recomendacion del archivo recommendations.sh
-    table_recom_long+="PROCESOS|$st_proc|$(get_recommendation "$(echo "$res_proc"|cut -d'|' -f3)");"
-    table_recom_long+="USUARIOS|$st_users|$(get_recommendation "$(echo "$res_users"|cut -d'|' -f3)")"
+    table_recom_long+="PROCESOS|$proc_z_status|$(get_recommendation "$proc_z_code");"
+    table_recom_long+="USUARIOS|$user_status|$(get_recommendation "$user_code")"
     
 
-    # llama la funcion build_prioritized_advice para asignar prioridad a cada recomendacion
+    # llama la funcion build_prioritized_advice para asignar MODULO|ESTADO|RECOMENDACION;
     table_recom_long=$(build_prioritized_advice "$table_recom_long")
-
-    # echo "DEBUG: $table_recom_long"
 
     # 6. Renderizamos la pantalla ejecutiva
     render_full_audit_screen "$health_data" "$table_recom_msg" "$table_recom_long"

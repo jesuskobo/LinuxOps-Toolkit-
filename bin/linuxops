@@ -32,10 +32,6 @@ source "${PROJECT_ROOT}/modules/system/process.sh"
 source "${PROJECT_ROOT}/modules/system/users.sh"
 source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
 
-# TEST
-source "${PROJECT_ROOT}/tests/test_process.sh"
-
-
 
 # 3. Leer las configuraciones iniciales (/lib/config)
 load_configurations

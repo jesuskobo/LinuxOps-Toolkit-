@@ -26,6 +26,7 @@ cpu_collect() {
     load_avg=$(uptime | awk -F'load average:' '{print $2}' | xargs)
 
     # 4. Porcentaje de uso entero
+    # local usage=90 #DEBUG
     local usage
     usage=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
 
@@ -58,13 +59,7 @@ cpu_evaluate() {
         recommendation_cpu="NONE"
     fi
 
-    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ]; then
-        # Salida limpia para la Auditoría Consolidada (core/router.sh)
-        echo "${status}|Uso actual al ${cpu_usage}% (${cpu_cores} núcleos)|${recommendation_cpu}"
-        return 0
-    fi
+    # Retorno ÚNICO Y PURO de datos para el renderizado de pantalla
+    echo "${cpu_model}|${cpu_cores}|${cpu_load}|${cpu_usage}|${status}|${recommendation_cpu}"
 
-    # Renderizar pantalla formateada
-    render_cpu_screen "$cpu_model" "$cpu_cores" "$cpu_load" "$cpu_usage" "$status" "$recommendation_cpu" # CPU_REC viene de recommendations.conf
 }

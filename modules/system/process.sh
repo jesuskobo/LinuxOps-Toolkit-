@@ -2,30 +2,30 @@
 # LinuxOps Toolkit - Módulo de procesos
 
 process_collect() {
-    # 1. Consulta única de todos los procesos del sistema.
+    # Consulta única de todos los procesos del sistema.
     local consult_process
     consult_process=$(ps -eo pid,%cpu,%mem,comm,stat --sort=-%cpu)
 
-    # 2. Obtiene los tres procesos con mayor consumo de CPU.
+    # 1. Obtiene los tres procesos con mayor consumo de CPU.
     # Formato: PID CPU% COMANDO
     local top_cpu
     top_cpu=$(echo "$consult_process" |awk 'NR!=1 {print $1, $2, $4}' |head -3|xargs)
 
-    # 3. Obtiene los tres procesos con mayor consumo de memoria RAM.
+    # 2. Obtiene los tres procesos con mayor consumo de memoria RAM.
     # Formato: PID MEM% COMANDO
     local top_mem
     top_mem=$(echo "$consult_process" | LC_NUMERIC=C sort -k3,3rn |awk 'NR!=1 {print $1, $3, $4}' |head -3|xargs)
 
-    # 4. Cuenta la cantidad de procesos en estado Zombie (Z).
+    # 3. Cuenta la cantidad de procesos en estado Zombie (Z).
     local z_process
     z_process=$(echo "$consult_process" | awk 'NR!=1 && $5 ~ /^Z/ {print $5}' |wc -l)
 
-    # 5. Cuenta los procesos activos.
+    # 4. Cuenta los procesos activos.
     # Se excluyen procesos Zombie (Z) y Stopped (T).
     local total_process
     total_process=$(echo "$consult_process" | awk 'NR!=1 && $5 !~ /^[ZT]/ {print $5}' |wc -l)
 
-    # 6. Devuelve todas las métricas separadas por '|'
+    # 5. Devuelve todas las métricas separadas por '|'
     echo "${top_cpu}|${top_mem}|${z_process}|${total_process}"
 
 }
@@ -71,53 +71,43 @@ process_evaluate() {
     esac
 
     # Obtener recomendación detallada segun codigo enviado Y Obtener recomendacion corta solo mensaje
-    local zombie_recommendation zombie_recommendation_msg
-    zombie_recommendation=$(get_recommendation "$z_code")
-    zombie_recommendation_msg=$(get_status_message "$z_code")
-    local s_zombie_render="$z_status|$zombie_recommendation"
-
-    # -------------------------------------------------------------------------
-    # Salida silenciosa (consumida por la auditoría ejecutiva)
-    # -------------------------------------------------------------------------
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$z_status|${zombie_recommendation_msg}|${z_code}"
-        return 0
-    fi
+    local z_recommendation z_recommendation_msg
+    z_recommendation=$(get_recommendation "$z_code") # por si se quiere agregar la recomendacion completa
+    z_recommendation_msg=$(get_status_message "$z_code")
 
     # -------------------------------------------------------------------------
     #  Evaluación de consumo de CPU
     # -------------------------------------------------------------------------
-    local c_status="OK"
-    local c_code="NONE"
+    local cpu_status="OK"
+    local cpu_code="NONE"
 
     local cpu_high=$(echo "$process_cpu" |awk '{print int($2)}' | bc) # COnvertir a decimales y tomar el primer proceso de cpu
     cpu_high="${cpu_high:-0}"
     
-    c_code=$(evaluate_threshold \
+    cpu_code=$(evaluate_threshold \
         "$cpu_high" \
         "$PROCESS_WARN_CPU_THRESHOLD" \
         "$PROCESS_CRIT_CPU_THRESHOLD" \
         "PROCESS_CPU_WARNING" \
         "PROCESS_CPU_CRITICAL")
 
-    case "$c_code" in
+    case "$cpu_code" in
         PROCESS_CPU_WARNING)
-            c_status="WARNING"
-            log_warn "$(get_status_message "$c_code"). Actual: $cpu_high"
+            cpu_status="WARNING"
+            log_warn "$(get_status_message "$cpu_code"). Actual: $cpu_high"
         ;;
 
         PROCESS_CPU_CRITICAL)
-            c_status="CRITICAL"
-            log_error "$(get_status_message "$c_code"). Actual: $cpu_high"
+            cpu_status="CRITICAL"
+            log_error "$(get_status_message "$cpu_code"). Actual: $cpu_high"
         ;;
         
     esac
 
     # Entregas status renderizado
     local cpu_recommendation cpu_recommendation_msg
-    cpu_recommendation=$(get_recommendation "$c_code")
-    cpu_recommendation_msg=$(get_status_message "$c_code")
-    local s_cpu_render="$c_status|$cpu_recommendation"
+    cpu_recommendation=$(get_recommendation "$cpu_code") # por si se quiere agregar la recomendacion completa
+    cpu_recommendation_msg=$(get_status_message "$cpu_code")
 
     # -------------------------------------------------------------------------
     # Evaluación de consumo de Memoria RAM
@@ -148,13 +138,12 @@ process_evaluate() {
     esac
 
     # Entregas status renderizado
-    local mem_recommendation mem_recommendation_msg
-    mem_recommendation=$(get_recommendation "$m_code")
-    mem_recommendation_msg=$(get_status_message "$m_code")
-    local s_mem_render="$m_status|$mem_recommendation"
+    local mem_recommendation m_recommendation_msg
+    mem_recommendation=$(get_recommendation "$m_code") # por si se quiere agregar la recomendacion completa
+    m_recommendation_msg=$(get_status_message "$m_code")
 
-    # Renderizado del modulo
-    render_process_screen "$process_cpu" "$process_mem" "$process_zombie" "$process_total" "$s_cpu_render" "$s_zombie_render" "$s_mem_render"
+    # Renderizado del modulo delimitado por pipe |
+    echo "${process_cpu}|${process_mem}|${process_zombie}|${process_total}|${z_status}|${z_recommendation_msg}|${z_code}|${cpu_status}|${cpu_recommendation_msg}|${cpu_code}|${m_status}|${m_recommendation_msg}|${m_code}"
 }
  
 evaluate_threshold() {

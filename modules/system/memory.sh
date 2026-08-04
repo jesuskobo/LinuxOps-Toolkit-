@@ -42,29 +42,24 @@ memory_evaluate() {
 
 
     # Determinar estado según umbrales
-    local status="OK"
-    local recommendation_mem="$MEM_REC" # MEM_REC viene de recommendations.conf
+    local memory_status="OK"
+    local memory_recommendation="$MEM_REC" # MEM_REC viene de recommendations.conf
 
     if [ "$memory_porcentage" -ge "$MEM_CRIT_THRESHOLD" ]; then
-        status="CRITICAL"
-        recommendation_mem="$MEM_CRIT_REC"
+        memory_status="CRITICAL"
+        memory_recommendation="$MEM_CRIT_REC"
         log_error "Uso critico de Memoria RAM: $memory_porcentage%"
 
     elif [ "$memory_porcentage" -ge "$MEM_WARN_THRESHOLD" ]; then
-        status="WARNING"
-        recommendation_mem="$MEM_WARN_REC"
+        memory_status="WARNING"
+        memory_recommendation="$MEM_WARN_REC"
         log_warn "Uso de memoria elevado $memory_porcentage%"
     else
-        status="OK"
-        recommendation_mem="NONE"
+        memory_status="OK"
+        memory_recommendation="NONE"
     fi
 
-    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$status|RAM usada al $memory_porcentage% ($memory_available GB disponibles)|$recommendation_mem"
-        return 0
-    fi
-    
-    render_memory_screen "$memory_total" "$memory_usage" "$memory_available" "$memory_porcentage" "$memory_swaps" "$status" "$recommendation_mem"
+    # Retornar datos limpios (Separados por pipe '|' SIN espacios internos corruptos)
+    echo "${memory_total}|${memory_usage}|${memory_available}|${memory_porcentage}|${memory_swaps}|${memory_status}|${memory_recommendation}"
 
 }

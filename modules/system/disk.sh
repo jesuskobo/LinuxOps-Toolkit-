@@ -41,11 +41,6 @@ disk_evaluate() {
         recommendation_disk="NONE"
     fi
 
-    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "${status}|Partición root (/) con $disk_usage_porc% de uso|${recommendation_disk}"
-        return 0
-    fi
-
-    render_disk_screen "$disk_total" "$disk_usage" "$disk_available" "$disk_usage_porc" "$disk_inode_porc" "$disk_dir_heavy" "$status" "$recommendation_disk" # Disk viene de recommendations.conf
+    # Retornar datos delimitados por pipe para su posterior procesamiento
+    echo "${disk_total}|${disk_usage}|${disk_available}|${disk_usage_porc}|${disk_inode_porc}|${disk_dir_heavy}|${status}|${recommendation_disk}"
 }

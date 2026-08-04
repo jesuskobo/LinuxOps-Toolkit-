@@ -13,7 +13,7 @@ users_collect() {
     local u_info_sesion=$(PROCPS_USERLEN=20 w -fh |awk '{print $1, $2, $3, $4, $5, $8}' |column -t|paste -sd ';')
 
     # Usuario con privilegios admin
-    u_privi=$({
+    local u_privi=$({
         getent group | awk -F: '$3==0 {print $1}'
         getent group sudo wheel | awk -F: '{print $4}'
         } | paste -sd ';'
@@ -41,7 +41,7 @@ users_evaluate() {
     local code="NONE"
 
     # Detectar intentos fallidos / Sesiones activas
-    local code=$(count_sesion "$user_log_fail")
+    code=$(count_sesion "$user_log_fail")
 
     # servir status y generar log
     case "$code" in
@@ -76,15 +76,10 @@ users_evaluate() {
     # Obtener recomendacion corta solo mensaje
     local recommendation_msg=$(get_status_message "$code")
 
-    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "${status}|${recommendation_msg}|$code"
-        return 0
-    fi
+    
 
-    # servir datos para renderizar
-    render_user_screen "$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status" "$recommendation"
-
+    # servir datos delimitados por pipe para ser procesados por router.sh
+    echo "${user_loggers}|${user_active_count}|${user_admin_count}|${user_uid_count}|${user_info_sessions}|${user_privileged}|${user_log_fail}|${status}|${recommendation_msg}|${code}"
 }
 
 

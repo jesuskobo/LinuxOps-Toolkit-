@@ -46,11 +46,6 @@ sysinfo_evaluate() {
         recommendation_sysinfo="NONE"
     fi
 
-    # --- CONTROL DE SALIDA PARALELA PARA manejar status ---
-    if [ "$1" == "--silent" ] || [ "$1" == "-s" ];then
-        echo "$status|$sys_hostname $sys_so|$recommendation_sysinfo"
-        return 0
-    fi
-
-    render_sysinfo_screen "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_around" "$status" "$recommendation_sysinfo"
+    # Servir datos mediante pipe
+    echo "$sys_hostname|$sys_so|$sys_kernel|$sys_arquit|$sys_up_time|$sys_around|$status|$recommendation_sysinfo"
 }

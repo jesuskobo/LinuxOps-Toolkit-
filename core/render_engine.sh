@@ -3,60 +3,58 @@
 
 # 1. RENDER CPU
 render_cpu_screen() {
-    local model="$1"
-    local cores="$2"
-    local load="$3"
-    local usage="$4"
-    local status="$5"
-    local rec="$6"
+    local raw_data
+    raw_data="$1"
+
+    # Descomponer datos enviados desde router.sh que viene con pipe |
+    local cpu_model cpu_cores cpu_load cpu_usage cpu_status cpu_rec
+    IFS='|' read -r cpu_model cpu_cores cpu_load cpu_usage cpu_status cpu_rec <<< "$raw_data"
 
 
     # Seleccionar color según estado
     local status_color="${GREEN}"
-    if [ "$status" = "WARNING" ]; then
+    if [ "$cpu_status" = "WARNING" ]; then
         status_color="${YELLOW}"
-    elif [ "$status" = "CRITICAL" ]; then
+    elif [ "$cpu_status" = "CRITICAL" ]; then
         status_color="${RED}"
     fi
 
     # Generar la barra de progreso ASCII (funcion en utils.py)
     local bar
-    bar=$(bar_progress_ascii 20 "$usage")
+    bar=$(bar_progress_ascii 20 "$cpu_usage")
 
     # Imprimir pantalla maquetada
     printf '====================================================================\n'
     printf ' RESULTADO: Uso actual de CPU\n'
     printf '====================================================================\n\n'
-    printf ' Modelo:       %s\n' "$model"
-    printf ' Núcleos:      %s\n' "$cores"
-    printf ' Carga Media:  %s\n' "$load"
+    printf ' Modelo:       %s\n' "$cpu_model"
+    printf ' Núcleos:      %s\n' "$cpu_cores"
+    printf ' Carga Media:  %s\n' "$cpu_load"
     printf ' Uso Actual:   [%b%s%b] %b%s%%%b (Estado: %b%s%b)\n\n' \
         "$status_color" "$bar" "${NC}" \
-        "$status_color" "$usage" "${NC}" \
-        "$status_color" "$status" "${NC}"
+        "$status_color" "$cpu_usage" "${NC}" \
+        "$status_color" "$cpu_status" "${NC}"
 
-    if [ "$status" != "OK" ] && [ -n "$rec" ]; then
-        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
+    if [ "$cpu_status" != "OK" ] && [ -n "$cpu_rec" ]; then
+        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$cpu_rec" "${NC}"
     fi
 
     printf '====================================================================\n'
+
 }
 
 # RENDER MEMORIA RAM
 
 render_memory_screen(){
-    local total="$1"
-    local usage="$2"
-    local available="$3"
-    local usage_porcentage="$4"
-    local swap="$5"
-    local status="$6"
-    local rec="$7"
+    local raw_data="$1"
+
+    local m_total m_usage m_available m_usage_porcentage m_swap m_status m_rec
+    IFS='|' read -r m_total m_usage m_available m_usage_porcentage m_swap m_status m_rec <<< "$raw_data"
 
 
     # Generar la barra de progreso ASCII (funcion en utils.py)
     local bar
-    bar=$(bar_progress_ascii 20 "$usage_porcentage")
+    bar=$(bar_progress_ascii 20 "$m_usage_porcentage")
 
     # seleccionar color segun estado
     local status_color="${GREEN}"
@@ -65,38 +63,35 @@ render_memory_screen(){
     printf '====================================================================\n'
     printf ' RESULTADO: Estado de la Memoria RAM y SWAP\n'
     printf '====================================================================\n'
-    printf ' Total RAM:                 %s\n' "$total GB"
-    printf ' RAM Usada:                 %s\n' "$usage GB"
-    printf ' RAM Disponible:            %s\n' "$available GB"
-    printf ' SWAP Usada/SWAP Total:     %s\n\n' "$swap GB"
+    printf ' Total RAM:                 %s\n' "$m_total GB"
+    printf ' RAM Usada:                 %s\n' "$m_usage GB"
+    printf ' RAM Disponible:            %s\n' "$m_available GB"
+    printf ' SWAP Usada/SWAP Total:     %s\n\n' "$m_swap GB"
     printf ' Uso Actual Real:           [%b%s%b] %b%s%%%b (Estado: %b%s%b)\n\n' \
         "$status_color" "$bar" "${NC}" \
-        "$status_color" "$usage_porcentage" "${NC}" \
-        "$status_color" "$status" "${NC}"
+        "$status_color" "$m_usage_porcentage" "${NC}" \
+        "$status_color" "$m_status" "${NC}"
     printf '%bNota: El "Uso Actual Real" excluye el caché del Kernel (buff/cache).%b\n' "${BOLD}" "${NC}"
     printf '====================================================================\n'
 
     # Condicional recomendaciones
-    if [ "$status" != "OK" ] && [ -n "$rec" ]; then
-        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
+    if [ "$m_status" != "OK" ] && [ -n "$m_rec" ]; then
+        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$m_rec" "${NC}"
     fi
 }
 
 # 3. RENDER DE DISCO DURO
 
 render_disk_screen() {
-    local total="$1"
-    local usage="$2"
-    local available="$3"
-    local usage_porcentage="$4"
-    local inode_porcentage="$5"
-    local dir_heavy=$6
-    local status="$7"
-    local rec="$8"
+    local raw_data="$1"
+
+    # descomponer los datos enviados desde router.sh que viene con pipe |
+    local d_total d_usage d_available d_usage_porcentage d_inode_porcentage d_dir_heavy d_status d_rec
+    IFS='|' read -r d_total d_usage d_available d_usage_porcentage d_inode_porcentage d_dir_heavy d_status d_rec <<< "$raw_data"
 
     ## Generar la barra de progreso ASCII (funcion en utils.py)
     local bar
-    bar=$(bar_progress_ascii 20 "$usage_porcentage")
+    bar=$(bar_progress_ascii 20 "$d_usage_porcentage")
 
     # seleccionar color segun estado 
     local status_color="${GREEN}"
@@ -105,68 +100,59 @@ render_disk_screen() {
     printf '====================================================================\n'
     printf ' RESULTADO: Estado del Almacenamiento y Discos\n'
     printf '====================================================================\n\n'
-    printf ' Partición (/):          %s | %s | %s \n' "$total GB Totales" "$usage GB Usados" "$available GB Libres"
+    printf ' Partición (/):          %s | %s | %s \n' "$d_total GB Totales" "$d_usage GB Usados" "$d_available GB Libres"
     printf ' Uso de Disco:           [%b%s%b] %b%s%%%b (Estado: %b%s%b)\n' \
         "$status_color" "$bar" "${NC}" \
-        "$status_color" "$usage_porcentage" "${NC}" \
-        "$status_color" "$status" "${NC}"
+        "$status_color" "$d_usage_porcentage" "${NC}" \
+        "$status_color" "$d_status" "${NC}"
 
-    printf ' Inodos Usados:          %s\n' "$inode_porcentage"
-    printf ' Directorio Pesado:      %s\n\n' "$dir_heavy"
+    printf ' Inodos Usados:          %s\n' "$d_inode_porcentage"
+    printf ' Directorio Pesado:      %s\n\n' "$d_dir_heavy"
     printf '====================================================================\n'
 
     # Condicional recomendaciones
-    if [ "$status" != "OK" ] && [ -n "$rec" ]; then
-        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$rec" "${NC}"
+    if [ "$d_status" != "OK" ] && [ -n "$d_rec" ]; then
+        printf ' %b Recomendación: %s%b\n\n' "${YELLOW}" "$d_rec" "${NC}"
     fi
 }
 
 
 # 4. RENDER DE RED
 render_network_screen() {
-    local network="$1"
-    local ip_local="$2"
-    local ip_public="$3"
-    local internet="$4"
-    local port_listen="$5"
-    local status="$6"
-    local rec="$7"
+    local raw_data="$1"
+
+    local n_network n_ip_local n_ip_public n_internet n_port_listen n_status n_rec
+    IFS='|' read -r n_network n_ip_local n_ip_public n_internet n_port_listen n_status n_rec <<< "$raw_data"
 
     # Imprimir pantalla maquetada
     printf '=========================================================================\n'
     printf ' RESULTADO: Estado de la Red e Interfaces\n'
     printf '=========================================================================\n\n'
-    printf ' Interfaz Principal:        %s\n' "$network"
-    printf ' IP Local (IPv4):           %s\n' "$ip_local"
-    printf ' IP Pública:                %s\n' "$ip_public"
-    printf ' Conectividad:              %s %s\n\n' "[$internet]" "Estado: $status"
-    printf ' Puertos Escuchando:        %s\n\n' "$port_listen (ss -tulnp)"
+    printf ' Interfaz Principal:        %s\n' "$n_network"
+    printf ' IP Local (IPv4):           %s\n' "$n_ip_local"
+    printf ' IP Pública:                %s\n' "$n_ip_public"
+    printf ' Conectividad:              %s %s\n\n' "[$n_internet]" "Estado: $n_status"
+    printf ' Puertos Escuchando:        %s\n\n' "$n_port_listen (ss -tulnp)"
     printf '=========================================================================\n\n'
 
-    if [ "$status" = "WARNING" ]; then
-        printf '%b Recomendación: %s%b\n\n' "${YELLOW}" "${rec}" "${NC}"
-    elif [ "$status" = "CRITICAL" ]; then
-        printf '%b Recomendación: %s%b\n\n' "${YELLOW}" "${rec}" "${NC}"
+    if [ "$n_status" = "WARNING" ]; then
+        printf '%b Recomendación: %s%b\n\n' "${YELLOW}" "${n_rec}" "${NC}"
+    elif [ "$n_status" = "CRITICAL" ]; then
+        printf '%b Recomendación: %s%b\n\n' "${YELLOW}" "${n_rec}" "${NC}"
     fi
 }
 
 # 5. RENDER DE PROCESOS
 
 render_process_screen() {
-    local p_cpu="$1"
-    local p_mem="$2"
-    local p_zombie="$3"
-    local p_total="$4"
-    local p_status_cpu="$5"
-    local p_status_zom="$6"
-    local p_status_mem="$7"
+    # p_ =process z_=zombie c_=cpu m_=memory
+    local raw_data="$1"
 
-    # Descomponer datos delimitados por pipe | de memoria cpu
-    local c_status c_rec z_status z_rec m_status m_rec
-    IFS='|' read -r c_status c_rec <<< "$p_status_cpu"
-    IFS='|' read -r z_status z_rec <<< "$p_status_zom"
-    IFS='|' read -r m_status m_rec <<< "$p_status_mem"
+    # echo "${procces_cpu}|${procces_mem}|${procces_zombie}|${procces_total}|${z_status}|${z_recommendation_msg}|${z_code}|${cpu_status}|${cpu_recommendation_msg}|${cpu_code}|${m_status}|${m_recommendation_msg}|${m_code}"
+    local procces_cpu procces_mem procces_zombie procces_total z_status z_recommendation_msg z_code cpu_status cpu_recommendation_msg cpu_code m_status m_recommendation_msg m_code
+    IFS='|' read -r procces_cpu procces_mem procces_zombie procces_total z_status z_recommendation_msg z_code cpu_status cpu_recommendation_msg cpu_code m_status m_recommendation_msg m_code <<< "$raw_data"
 
+    echo "$raw_data"
 
     # Imprimir pantalla Maquetada
     local status_color="${GREEN}"
@@ -174,29 +160,29 @@ render_process_screen() {
     printf '=========================================================================\n'
     printf 'RESULTADO: Monitoreo de Procesos y Estado del Kernel\n'
     printf '=========================================================================\n\n'
-    printf 'Total Procesos Activos:        %s\n' "$p_total"
-    printf 'Procesos Zombie:               %s %s\n\n' "$p_zombie" "(Estado: $z_status)"
+    printf 'Total Procesos Activos:        %s\n' "$procces_total"
+    printf 'Procesos Zombie:               %s %s\n\n' "$procces_zombie" "(Estado: $z_status)"
     printf 'Top Procesos por CPU: \n'
     
     # llamar funcion para agregar procesos de forma escalable
-    bucle_render "$p_cpu" "CPU"
+    bucle_render "$procces_cpu" "CPU"
 
     printf '\nTop Procesos por MEMORIA: \n'
 
-    bucle_render "$p_mem" "RAM"
+    bucle_render "$procces_mem" "RAM"
 
     printf '\n'
     printf '=========================================================================\n\n'
     
     # Recomendaciones si algún estado no es OK
-    if [ "$z_status" != "OK" ] && [ "$z_rec" != "N/A" ]; then
-        printf '%bRecomendación Zombie: %s%b\n' "${YELLOW}" "$z_rec" "${NC}"
+    if [ "$z_status" != "OK" ] && [ "$z_recommendation_msg" != "N/A" ]; then
+        printf '%bRecomendación Zombie: %s%b\n' "${YELLOW}" "$z_recommendation_msg" "${NC}"
     fi
-    if [ "$c_status" != "OK" ] && [ "$c_rec" != "N/A" ]; then
-        printf '%bRecomendación CPU: %s%b\n' "${YELLOW}" "$c_rec" "${NC}"
+    if [ "$cpu_status" != "OK" ] && [ "$cpu_recommendation_msg" != "N/A" ]; then
+        printf '%bRecomendación CPU: %s%b\n' "${YELLOW}" "$cpu_recommendation_msg" "${NC}"
     fi
-    if [ "$m_status" != "OK" ] && [ "$z_status" != "N/A" ];then
-        printf '%bRecomendación RAM: %s%b\n\n' "${YELLOW}" "$m_rec" "${NC}"
+    if [ "$m_status" != "OK" ] && [ "$m_recommendation_msg" != "N/A" ];then
+        printf '%bRecomendación RAM: %s%b\n\n' "${YELLOW}" "$m_recommendation_msg" "${NC}"
     fi
 }
 
@@ -225,15 +211,10 @@ bucle_render() {
 # 6. RENDER DE USUARIOS
 #"$user_loggers" "$user_active_count" "$user_admin_count" "$user_uid_count" "$user_info_sessions" "$user_privileged" "$user_log_fail" "$status"
 render_user_screen() {
-    local u_logger="$1"
-    local u_active_count="$2"
-    local u_admin_count="$3"
-    local u_uid_count="$4"
-    local u_info_sessions="$5"
-    local u_privileged="$6"
-    local u_log_fail="$7"
-    local status="$8"
-    local rec="$9"
+    local raw_data="$1"
+
+    local u_logger u_active_count u_admin_count u_uid_count u_info_sessions u_privileged u_log_fail status rec
+    IFS='|' read -r u_logger u_active_count u_admin_count u_uid_count u_info_sessions u_privileged u_log_fail status rec <<< "$raw_data"
 
     # Descomponer elementos
     # 1. Descomponer variable u_logger para contar usuarios y entregar datos formateado o separados por ,
@@ -299,15 +280,10 @@ render_user_screen() {
 # 7. RENDER DE SYSINFO 
 # "$sys_hostname" "$sys_so" "$sys_kernel" "$sys_arquit" "$sys_up_time" "$sys_entorno" "$status"
 render_sysinfo_screen(){
-    local s_hostname="$1"
-    local s_so="$2"
-    local s_kernel="$3"
-    local s_aquitec="$4"
-    local s_up_time="$5"
-    local s_around="$6"
-    local status="$7"
-    local rec="$8"
+    local raw_data="$1"
 
+    local s_hostname s_so s_kernel s_aquitec s_up_time s_around status rec
+    IFS='|' read -r s_hostname s_so s_kernel s_aquitec s_up_time s_around status rec <<< "$raw_data"
     
     # Imprimir pantalla maquetada
     printf '=========================================================================\n'
