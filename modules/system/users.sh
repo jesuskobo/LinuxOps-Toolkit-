@@ -6,11 +6,12 @@ users_collect() {
     #metricas de resumen
     local u_loggers=$(who |awk '{print $1}' |sort -u|paste -sd ';') # usuarios logueados
     local u_activas=$(who |awk  '$2 ~ /tty|pts/ {print $1}'|wc -l) # sesiones activas TTY/PTS
-    local u_sudo=$(getent group sudo wheel |cut -d: -f4 |wc -l) # obtener # usuario sudo o wheel
+    local u_sudo=$(getent group sudo wheel 2>/dev/null |cut -d: -f4 |wc -l) # obtener # usuario sudo o wheel
     local u_uid=$(getent passwd |awk -F: '$3==0 {print $3}' |wc -l) # debe esta 1 solo root si hay otro hay un problema de seguridad
 
     # Metricas de sesiones activas |USUARIO TTY DESDE_(IP) DESDE_CUANDO INACTIVO COMANDO_ACTUAL
     local u_info_sesion=$(PROCPS_USERLEN=20 w -fh |awk '{print $1, $2, $3, $4, $5, $8}' |column -t|paste -sd ';')
+    u_info_sesion="${u_info_sesion:-Sin sesiones activas}"
 
     # Usuario con privilegios admin
     local u_privi=$({
@@ -20,7 +21,7 @@ users_collect() {
     )
 
     # Intento fallidos de sesion
-    local u_sesion_fail=$(journalctl -u "sshd" --since "1 day ago" |grep -iE "Failed password|authentication failure"|tr 'A-Z' 'a-z')
+    local u_sesion_fail=$(journalctl -u "sshd" --since "1 day ago" 2>/dev/null |grep -iE "Failed password|authentication failure"|tr 'A-Z' 'a-z')
     local u_log_info=$(format_log "$u_sesion_fail" |paste -sd';')
     
     # servir datos con pipe

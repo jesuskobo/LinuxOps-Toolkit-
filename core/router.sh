@@ -67,6 +67,9 @@ route_command() {
         "help"|"-h"|"--help")
             printf "Uso: linuxops [comando]\n"
             ;;
+        "version"|"-v"|"--version")
+            printf "LinuxOps Toolkit v%s\n" "${APP_VERSION:-1.0.0}"
+            ;;
         *)
             printf "${RED}Error: Comando $1 no reconocido\n"
             log_error "Error: Comando $1 no reconocido"
