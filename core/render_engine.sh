@@ -148,11 +148,8 @@ render_process_screen() {
     # p_ =process z_=zombie c_=cpu m_=memory
     local raw_data="$1"
 
-    # echo "${procces_cpu}|${procces_mem}|${procces_zombie}|${procces_total}|${z_status}|${z_recommendation_msg}|${z_code}|${cpu_status}|${cpu_recommendation_msg}|${cpu_code}|${m_status}|${m_recommendation_msg}|${m_code}"
     local procces_cpu procces_mem procces_zombie procces_total z_status z_recommendation_msg z_code cpu_status cpu_recommendation_msg cpu_code m_status m_recommendation_msg m_code
     IFS='|' read -r procces_cpu procces_mem procces_zombie procces_total z_status z_recommendation_msg z_code cpu_status cpu_recommendation_msg cpu_code m_status m_recommendation_msg m_code <<< "$raw_data"
-
-    echo "$raw_data"
 
     # Imprimir pantalla Maquetada
     local status_color="${GREEN}"
