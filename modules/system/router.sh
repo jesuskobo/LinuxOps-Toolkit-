@@ -62,13 +62,13 @@ route_system(){
             log_error "Error: subcomando vacio"
             exit 1
             ;;
+        "help"|"-h"|"--help")
+            show_system_help
+            ;;
         *)
             printf "${RED}Error: subcomando $2 no reconocido ejecute [linuxops system -h] para mas informacion\n"
             log_error "Error: subcomando $2 no reconocido"
             exit 1
-            ;;
-        "help"|"-h"|"--help")
-            show_system_help
             ;;
     esac
 }
