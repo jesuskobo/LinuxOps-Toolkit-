@@ -317,26 +317,21 @@ render_full_audit_screen() {
     local f_score_global f_global_status f_count_ok f_count_warn f_count_crit
     IFS='|' read -r f_score_global f_global_status f_count_ok f_count_warn f_count_crit <<< "$raw_data_status"
 
-    # 2. Descomponer datos de recomendaciones.
-
-
-    # 3. Generar la barra de progreso ASCII (funcion en utils.py)
+    # 2. Generar la barra de progreso ASCII (funcion en utils.py)
     local bar
     bar=$(bar_progress_ascii 20 "$f_score_global")
 
-    # 4. Manejar colores de los status
-
+    # 3. Manejar colores de los status
     local status_color="${GREEN}"
     if [ "$f_global_status" == "CRITICAL" ]; then
         status_color="${RED}"
-
     elif [ "$f_global_status" == "WARNING" ]; then
         status_color="${YELLOW}"
     else
         status_color="${GREEN}"
     fi
 
-    # renderizar estado y recomendacion de (ram, disk, cpu etc)
+    # 4. renderizar estado y recomendacion de (ram, disk, cpu etc)
     local format_audit_reco=$( 
     {
         
@@ -350,7 +345,7 @@ render_full_audit_screen() {
     }
     )
 
-    # Imprimir pantalla maquetada
+    # 5. Imprimir pantalla maquetada
     printf '=========================================================================\n'
     printf '        LINUXOPS TOOLKIT - AUDITORÍA EJECUTIVA DEL SISTEMA\n'
     printf '=========================================================================\n\n'
@@ -362,8 +357,7 @@ render_full_audit_screen() {
     printf '%s\n' "$format_audit_reco"
     printf '=========================================================================\n'
     
-    # RECOMENDACIONES DE SUBSISTEMAS
-    
+    # 6. RECOMENDACIONES DE SUBSISTEMAS
     # bucle para recorrer cada linea de raw_data_rec_long y mostrar solo las recomendaciones que no sean de prioridad baja (LOW)
     local header_printed=false
     while read -r line;do

@@ -9,6 +9,7 @@ logs/*.log
 reports/*.txt
 reports/*.json
 reports/*.html
+clean.sh
 
 # Mantener carpetas pero no su contenido
 !logs/.gitkeep

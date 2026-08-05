@@ -2,13 +2,13 @@
 # LinuxOps Toolkit - Punto de Entrada Principal
 
 # 1. Encontrar la carpeta raíz de nuestro proyecto
-BIN_DIR="$(dirname "${BASH_SOURCE[0]}")"
-PROJECT_ROOT="$(cd "${BIN_DIR}/.." && pwd)"
+BIN_DIR="$(dirname "${BASH_SOURCE[0]}")"     # 
+PROJECT_ROOT="$(cd "${BIN_DIR}/.." && pwd)"  # Al terminar poner PROJECT_ROOT="/opt/linuxops"
 
 export PROJECT_ROOT
 
-# 2. Cargar las funciones a la memoria del programa
-# Lib
+#  Cargar las funciones a la memoria del programa
+# 2. Lib
 source "${PROJECT_ROOT}/lib/colors.sh"
 source "${PROJECT_ROOT}/lib/logger.sh"
 source "${PROJECT_ROOT}/lib/config.sh"
@@ -16,14 +16,17 @@ source "${PROJECT_ROOT}/lib/utils.sh"
 source "${PROJECT_ROOT}/lib/validator.sh"
 source "${PROJECT_ROOT}/lib/progress.sh"
 source "${PROJECT_ROOT}/lib/recommendations.sh"
+source "${PROJECT_ROOT}/lib/help.sh"
 
-# Core
+# 3. Core
 source "${PROJECT_ROOT}/core/router.sh"
 source "${PROJECT_ROOT}/core/render_engine.sh"
 source "${PROJECT_ROOT}/core/health_score.sh"
 source "${PROJECT_ROOT}/core/evaluator_engine.sh"
 
-# Modulos
+# 4. Modulos
+# system
+source "${PROJECT_ROOT}/modules/system/router.sh"
 source "${PROJECT_ROOT}/modules/system/cpu.sh"
 source "${PROJECT_ROOT}/modules/system/memory.sh"
 source "${PROJECT_ROOT}/modules/system/disk.sh"
@@ -31,13 +34,15 @@ source "${PROJECT_ROOT}/modules/system/network.sh"
 source "${PROJECT_ROOT}/modules/system/process.sh"
 source "${PROJECT_ROOT}/modules/system/users.sh"
 source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
+# admin
+source "${PROJECT_ROOT}/modules/admin/services.sh"
 
 
-# 3. Leer las configuraciones iniciales (/lib/config)
+# 5. Leer las configuraciones iniciales (/lib/config)
 load_configurations
 
-# 4. #Registro en el archivo log con severidad estandarizada (Funciones en .conf)
+# 6. #Registro en el archivo log con severidad estandarizada (Funciones en .conf)
 log_info "Framework LinuxOps-Toolkit v${APP_VERSION} inicializado exitosamente por el usuario $USER"
 
-# 5. Enviar los comandos del usuario al cerebro (router.sh)
+# 7. Enviar los comandos del usuario al cerebro (router.sh)
 route_command "$@"
