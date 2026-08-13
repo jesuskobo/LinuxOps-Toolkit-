@@ -35,6 +35,7 @@ source "${PROJECT_ROOT}/modules/system/process.sh"
 source "${PROJECT_ROOT}/modules/system/users.sh"
 source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
 # admin
+source "${PROJECT_ROOT}/modules/admin/router.sh"
 source "${PROJECT_ROOT}/modules/admin/services.sh"
 
 
