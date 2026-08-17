@@ -13,7 +13,9 @@ route_admin() {
         "service" | "services")
             case "$action" in
                 "status"|"STATUS")
-                    service_evaluate "$name_service"
+                    local output
+                    output=$(service_evaluate "$name_service" "N/A")
+                    render_services_screen "$output"
                 ;;
                 "start"|"START")
                     echo "iniciando servicio"
