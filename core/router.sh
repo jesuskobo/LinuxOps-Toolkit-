@@ -14,7 +14,7 @@ route_command() {
             route_admin "$2" "$3" "$4"
         ;;
         
-        # MANEJO DE HELPER Y ERRORES
+        # MANEJO DE HELPER Y ERRORES - lib/help.sh
         "help"|"-h"|"--help")
             show_help
         ;;

@@ -11,32 +11,50 @@ route_admin() {
     case "$type_module" in
         # Ingresar a service con sus comandos
         "service" | "services")
+            # Verifica si el servicio existe y mostrar informacion pantalla
+            # comando: ./bin/linuxops admin service crond
+            if [ -n "$action" ] && [ -z "$name_service" ]; then
+                if systemctl list-unit-files --type=service |awk '{print $1}' | grep -qx "${action}.service"; then
+                    name_service="$action"
+                    local output
+                    output=$(service_execute "$name_service" "N/A")
+
+                    if [ $? -eq 0 ]; then
+                        render_services_screen "$output"
+                        service_menu "$name_service"
+                    fi
+                    return
+                fi
+            fi
+
             case "$action" in
                 "status"|"STATUS")
                     local output
-                    output=$(service_evaluate "$name_service" "N/A")
-                    render_services_screen "$output"
+                    output=$(service_execute "$name_service" "N/A")
+
+                    if [ $? -eq 0 ]; then
+                        render_services_screen "$output"
+                    fi
                 ;;
-                "start"|"START")
-                    echo "iniciando servicio"
+                "start"|"START"|"stop"|"STOP"|"reload"|"RELOAD"|"restart"|"RESTART")
+                    service_execute "$name_service" "$action"
                 ;;
-                "stop"|"STOP")
-                    echo "Deteniendo servicio"
+                "logs"|"LOGS")
+                    printf 'Logs en desarrollo.\n'
                 ;;
-                "reload"|"RELOAD")
-                    echo "recargando servicio"
-                ;;
-                "restart"|"RESTART")
-                    echo "reiniciando servicio"
-                ;;
+
                 "")
-                    echo "Error: subcomando vacio"
+                    printf '%bError: Ingrese un servicio.%b\n' "$RED" "$NC"
+                    return 1
                 ;;
+
                 *)
-                    echo "Error: subcomando '$action' desconocido"
+                    printf '%bError: El servicio "%s" no existe.%b\n' "$RED" "$action" "$NC"
+                    return 1
                 ;;
             esac
         ;;
+
 
         "")
             printf "${RED}Error: subcomando vacio ejecute [linuxops admin -h] para mas informacion.\n"

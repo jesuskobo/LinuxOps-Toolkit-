@@ -386,12 +386,12 @@ render_full_audit_screen() {
 }
 
 # 9. RENDER GESTION DE SERVICIO
-# PID|user|status|cpu|memoria_ram|tiempo activo|tiempo caido
+# PID|user|status|cpu|memoria_ram|tiempo activo|tiempo caido|diagnostico
 render_services_screen() {
     local raw_data="$1"
     # Descomponer datos enviados por pipe
-    local service_name service_pid service_user service_status_run service_status_Authorization service_cpu service_memory service_time_up service_time_down
-    IFS='|' read -r service_name service_pid service_user service_status_run service_status_Authorization service_cpu service_memory service_time_up service_time_down <<< "$raw_data"
+    local service_name service_pid service_user service_status_run service_status_Authorization service_cpu service_memory service_time_up service_time_down service_diagnostic
+    IFS='|' read -r service_name service_pid service_user service_status_run service_status_Authorization service_cpu service_memory service_time_up service_time_down service_diagnostic <<< "$raw_data"
 
     # escoger tiempo activo o inactivo
     local status_time
@@ -409,7 +409,10 @@ render_services_screen() {
         starting="NO"
     fi
 
+    # descomponer diagnostico
+    local diagnostic=$(echo $service_diagnostic | tr ';' '\n')
 
+    
     # renderizar en pantalla servicio
     printf '=========================================================================\n'
     printf '        LINUXOPS TOOLKIT - ADMIN > SERVICE > %s\n' "$service_name"
@@ -417,25 +420,16 @@ render_services_screen() {
     printf 'ESTADO DE EJECUCION\n'
     printf 'Estado                  : %s\n' "$service_status_run"
     printf 'PID                     : %s\n' "$service_pid"
-    printf 'CPU                     : %s\n' "$service_cpu"
-    printf 'MEMORIA                 : %s\n' "$service_memory"
+    printf 'CPU                     : %s\n' "$service_cpu %"
+    printf 'MEMORIA                 : %s\n' "$service_memory %"
     printf 'UPTIME                  : %s\n\n' "$status_time"
     printf 'ARRANQUE AUTOMÁTICO\n'
     printf 'Al iniciar              : %s\n' "$starting"
-    printf 'configuracion           : %s\n\n' "$service_status_Authorization"
+    printf 'configuracion           : %s\n' "$service_status_Authorization"
     printf '%s''-------------------------------------------------------------------------\n'
     printf "DIAGNÓSTICO\n"
     printf '%s''-------------------------------------------------------------------------\n'
-
-
+    printf '%s\n' "$diagnostic"
     printf '%s''-------------------------------------------------------------------------\n'
-    printf "ACCIONES\n"
-    printf '%s''-------------------------------------------------------------------------\n'
-    printf '[1] Reiniciar           \n'
-    printf '[2] Detener             \n'
-    printf '[3] Recargar            \n'
-    printf '[4] Ver logs            \n'
-    printf '[5] Volver              \n'
-    printf '=========================================================================\n'
-
 }
+
