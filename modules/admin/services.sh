@@ -1,7 +1,39 @@
 #!/usr/bin/env bash
 # LinuxOps Toolkit - Modulo admin-servicios
 
+# Gestiona la consulta, diagnóstico y administración de servicios systemd.
+
+# UTILIDADES
+# Convierte un timestamp de systemd en tiempo transcurrido legible.
+
+convert_date() {
+    local time="$1"
+
+    if [ -z "$time" ]; then
+        echo "N/A"
+        return
+    fi
+
+    local active_epoch
+    local now_epoch
+    local elapsed
+
+    active_epoch=$(date -d "$time" +%s 2>/dev/null)
+    now_epoch=$(date +%s)
+
+    if [ -z "$active_epoch" ]; then
+        echo "N/A"
+        return
+    fi
+
+    elapsed=$((now_epoch - active_epoch))
+
+    echo "$((elapsed / 3600))h $(((elapsed % 3600) / 60))m"
+}
+
 # RECOLECCION DE INFORMACION DEL SISTEMA
+# Recolecta estado, PID, recursos, uptime y datos del servicio.
+
 service_collect() {
     local serv="$1"
     local user=$(logname 2>/dev/null || whoami)
@@ -34,60 +66,91 @@ service_collect() {
     # PID|user|status_running|status_authorization|cpu|memoria_ram|tiempo activo|tiempo caido|diagnostico
     echo "${serv}|${pid}|${user}|${status_running}|${status_authorization}|${cpu}|${memory}|${time_up}|${time_down}|${diagnostic}"
 }
-# convertir fecha a formato entendible
-convert_date() {
-    local time="$1"
 
-    if [ -z "$time" ]; then
-        echo "N/A"
-        return
-    fi
+# DIAGNÓSTICO
+# Evalúa el estado operativo, PID, arranque y red del servicio
 
-    local active_epoch
-    local now_epoch
-    local elapsed
-
-    active_epoch=$(date -d "$time" +%s 2>/dev/null)
-    now_epoch=$(date +%s)
-
-    if [ -z "$active_epoch" ]; then
-        echo "N/A"
-        return
-    fi
-
-    elapsed=$((now_epoch - active_epoch))
-
-    echo "$((elapsed / 3600))h $(((elapsed % 3600) / 60))m"
-}
-# Diagnosticar sistema
 service_diagnose() {
     local serv="$1"
     local status_running="$2"
     local status_authorization="$3"
     local pid="$4"
 
+    # Mensaje servicio esta activo o no
     if [ "$status_running" == "active" ]; then
         echo "[✓] Servicio activo"
     else
         echo "[✗] Servicio no está activo"
     fi
 
+    # Mensaje sobre el pid del servicio
     if [ "$pid" -gt 0 ]; then
         echo "[✓] PID principal encontrado: $pid"
+        echo "$(info_ip_port $pid)"
     else
         echo "[✗] No se encontró PID principal"
     fi
 
+    # mensaje sobre autorizacion del servicio
     if [ "$status_authorization" == "enabled" ]; then
         echo "[✓] Servicio habilitado al inicio"
     elif [ "$status_authorization" == "disabled" ]; then
         echo "[!] Servicio deshabilitado al inicio"
     else
         echo "[!] Estado de habilitación: $status_authorization"
+    fi   
+}
+# Detecta puertos y direcciones de escucha asociados al proceso.
+info_ip_port(){
+    local pid="$1"
+    local socket
+    local ip
+    local port
+    local type_ip
+
+    # Comprobamos si existe un PID
+    if [ -z "$pid" ]; then
+        echo "[!] Por favor, introduce un PID válido."
+        return 1
     fi
+
+    # Obtener sockets asociados al PID
+    socket=$(ss -lptn 2>/dev/null |awk -v pid="$pid" '$0 ~ "pid=" pid "[,)]" {print $4}')
+
+    # No existen sockets
+    if [[ -z "$socket" ]]; then
+        echo "[!] No se detectaron puertos escuchando para este proceso."
+        return 0
+    fi
+
+    ip=$(echo "$socket" |sed -E 's/:[0-9]+$//')
+    port=$(echo "$socket" sed -E 's/.*:([0-9]+)$/\1/')
+    if [ "$ip" == "127.0.0.1" ];then
+        type_ip="Local (IPv4)"
+    elif [ "$ip" == "0.0.0.0" ];then
+        type_ip="Todas las interfaces (IPv4)"
+    elif [[ "$ip" == 192.168.* ]];then
+        type_ip="Red Local / NETWORK"
+    elif [ "$ip" == "::1" ];then
+        type_ip="Local (IPv6)"
+    elif [ "$ip" == "::" ];then
+        type_ip="Todas las interfaces (IPv6)"
+    else
+        type_ip="Externa / Desconocida ($ip)"
+    fi
+
+    # Devolver valores de puerto e ip
+    if [ -n "$ip" ];then
+        echo "[✓] Puerto $port/TCP escuchando: $type_ip $ip"
+    else
+        echo "[!] No exite puerto para habilitado para este servicio"
+    fi
+
 }
 
-# EVALUAR INFORMACION Y ENTREGARLA
+# EJECUCIÓN
+# Muestra el menú de acciones disponibles para el servicio.
+
 service_execute() {
     local name_service="$1"
     local action="$2"
@@ -119,7 +182,9 @@ service_execute() {
  
 }
 
-# Menu de servicio y accion a realizar
+# INTERFAZ
+# Muestra el menú de acciones disponibles para el servicio.
+
 service_menu() {
     local service_name="$1"
     local option
@@ -167,7 +232,9 @@ service_menu() {
     done
 }
 
-# Refrescar informacion servicio al realizarl alguna accion
+# ACTUALIZACIÓN
+# Actualiza la información del servicio después de una acción.
+
 service_refresh_screen() {
     local service_name="$1"
     local output
