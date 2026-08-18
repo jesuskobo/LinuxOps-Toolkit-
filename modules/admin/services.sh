@@ -101,7 +101,7 @@ service_diagnose() {
     fi   
 }
 # Detecta puertos y direcciones de escucha asociados al proceso.
-info_ip_port(){
+info_ip_port() {
     local pid="$1"
     local socket
     local ip
@@ -109,43 +109,60 @@ info_ip_port(){
     local type_ip
 
     # Comprobamos si existe un PID
-    if [ -z "$pid" ]; then
-        echo "[!] Por favor, introduce un PID válido."
+    if [[ ! "$pid" =~ ^[0-9]+$ ]] || (( pid <= 0 )); then
+        echo "[!] PID inválido."
         return 1
     fi
 
     # Obtener sockets asociados al PID
-    socket=$(ss -lptn 2>/dev/null |awk -v pid="$pid" '$0 ~ "pid=" pid "[,)]" {print $4}')
+    local sockets
+    sockets=$(sudo ss -lptn 2>/dev/null |awk -v pid="$pid" '$0 ~ "pid=" pid "[,)]" {print $4}')
 
     # No existen sockets
-    if [[ -z "$socket" ]]; then
+    if [[ -z "$sockets" ]]; then
         echo "[!] No se detectaron puertos escuchando para este proceso."
         return 0
     fi
 
-    ip=$(echo "$socket" |sed -E 's/:[0-9]+$//')
-    port=$(echo "$socket" sed -E 's/.*:([0-9]+)$/\1/')
-    if [ "$ip" == "127.0.0.1" ];then
-        type_ip="Local (IPv4)"
-    elif [ "$ip" == "0.0.0.0" ];then
-        type_ip="Todas las interfaces (IPv4)"
-    elif [[ "$ip" == 192.168.* ]];then
-        type_ip="Red Local / NETWORK"
-    elif [ "$ip" == "::1" ];then
-        type_ip="Local (IPv6)"
-    elif [ "$ip" == "::" ];then
-        type_ip="Todas las interfaces (IPv6)"
-    else
-        type_ip="Externa / Desconocida ($ip)"
-    fi
+    # Procesar cada socket individualmente
+    while IFS= read -r socket; do
 
-    # Devolver valores de puerto e ip
-    if [ -n "$ip" ];then
+        # Extraer puerto
+        port=$(sed -E 's/.*:([0-9]+)$/\1/' <<< "$socket")
+
+        # Extraer IP
+        ip=$(sed -E 's/:[0-9]+$//' <<< "$socket")
+
+        # Quitar corchetes de IPv6
+        ip="${ip#[}"
+        ip="${ip%]}"
+
+        # Clasificar dirección
+        if [[ "$ip" == "127.0.0.1" ]]; then
+            type_ip="Local (IPv4)"
+
+        elif [[ "$ip" == "0.0.0.0" ]]; then
+            type_ip="Todas las interfaces (IPv4)"
+
+        elif [[ "$ip" == 192.168.* ]]; then
+            type_ip="Red Local (IPv4)"
+
+        elif [[ "$ip" == "::1" ]]; then
+            type_ip="Local (IPv6)"
+
+        elif [[ "$ip" == "::" ]]; then
+            type_ip="Todas las interfaces (IPv6)"
+
+        elif [[ "$ip" == fe80:* ]]; then
+            type_ip="Link-Local (IPv6)"
+
+        else
+            type_ip="Externa / Desconocida"
+        fi
+
         echo "[✓] Puerto $port/TCP escuchando: $type_ip $ip"
-    else
-        echo "[!] No exite puerto para habilitado para este servicio"
-    fi
 
+    done <<< "$sockets"
 }
 
 # EJECUCIÓN
@@ -190,6 +207,7 @@ service_menu() {
     local option
 
     while true; do
+        printf '\n%s''-------------------------------------------------------------------------\n'
         printf 'ACCIONES - %s\n' "$service_name"
         printf '%s\n' '-------------------------------------------------------------------------'
         printf '[1] Reiniciar\n'
@@ -215,11 +233,12 @@ service_menu() {
                 service_refresh_screen "$service_name"
                 ;;
             4)
-                printf "opcion en desarrollo\n"
-                # service_logs "$service_name"
+                printf '%bPresione Q para salir.%b\n' "$GREEN" "$NC"
+                journalctl -u "$service_name"
+                # break
                 ;;
             5)  
-                printf "Hasta pronto!!\n"
+                printf "Hasta prontOPS!!\n"
                 break
                 ;;
             *)
