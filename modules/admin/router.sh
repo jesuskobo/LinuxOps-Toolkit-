@@ -55,6 +55,14 @@ route_admin() {
             esac
         ;;
 
+        "backup" | "BACKUP")
+            local output
+            output=$(backup_evaluate)
+
+            render_backup_screen "$output"
+            backup_menu
+            
+        ;;
 
         "")
             printf "${RED}Error: subcomando vacio ejecute [linuxops admin -h] para mas informacion.\n"

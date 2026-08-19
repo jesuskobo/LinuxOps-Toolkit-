@@ -433,3 +433,32 @@ render_services_screen() {
     
 }
 
+# 10. RENDER GESTION DE BACKUPS
+# ruta_destino|espacio_disponible|contar-archivos.tar.gz|peso_capeta_detino|ultimos_backup
+render_backup_screen(){
+    local raw_data="$1"
+
+    # Descomponer datso enviados por pipe
+    local backup_route_destiny backup_space_available backup_count_file backup_weight_file backup_latest
+    IFS='|' read -r backup_route_destiny backup_space_available backup_count_file backup_weight_file backup_latest <<< "$raw_data"
+
+    # renderizar en pantalla Backup
+    clear
+    printf '=========================================================================\n'
+    printf '                    LINUXOPS > ADMIN > BACKUPS\n'
+    printf '=========================================================================\n\n'
+    printf 'ESTADO DE ALMACENAMIENTO\n\n'
+    printf 'Ruta destino            : %s\n' "$backup_route_destiny"
+    printf 'Espacio libre           : %s\n' "$backup_space_available"
+    printf 'Total respaldos         : %s\n' "$backup_count_file"
+    printf 'Peso total              : %s\n\n' "$backup_weight_file"
+    printf '%s''-------------------------------------------------------------------------\n'
+    printf "HISTORIAL DE RESPALDOS\n"
+    printf '%s''-------------------------------------------------------------------------\n'
+    local contador=1    
+    while read -r backup;do
+        printf '%s\n' "[$contador] $backup"
+        ((contador++))
+    done < <(tr ';' '\n' <<< "$backup_latest")
+
+}

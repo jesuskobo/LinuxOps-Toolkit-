@@ -48,7 +48,7 @@ show_banner() {
     printf "%b--------------------------------------------------%b\n" "${WHITE}" "${NC}"
 }
 
-# ACCION PARA REALIZAR A SERVICIOS
+# Gestion de status de servicios
 action_service() {
     local name_service="$1"
     local action="$2"
@@ -79,9 +79,11 @@ action_service() {
 
     if systemctl "$action" "$name_service"; then
         printf '%b[✓] Acción ejecutada correctamente.%b\n' "$GREEN" "$NC"
+        log_info "Acción '$action' ejecutada correctamente en '$name_service'"
         read -rp "Presione ENTER para actualizar el estado..."
     else
         printf '%b[✗] Error ejecutando la acción.%b\n' "$RED" "$NC"
+        log_error "Error ejecutando acción '$action' en '$name_service'"
         return 1
     fi
 

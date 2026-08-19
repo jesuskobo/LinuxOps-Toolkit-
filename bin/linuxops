@@ -37,6 +37,8 @@ source "${PROJECT_ROOT}/modules/system/sysinfo.sh"
 # admin
 source "${PROJECT_ROOT}/modules/admin/router.sh"
 source "${PROJECT_ROOT}/modules/admin/services.sh"
+# Backup
+source "${PROJECT_ROOT}/modules/admin/backups.sh"
 
 
 # 5. Leer las configuraciones iniciales (/lib/config)

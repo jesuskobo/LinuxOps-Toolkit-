@@ -221,18 +221,45 @@ service_menu() {
 
         case "$option" in
             1)
-                action_service "$service_name" "restart"
-                service_refresh_screen "$service_name"
+                read -p "Esta seguro que desea reiniciar el servicio $service_name [s/N]: " confirm
+
+                case "$confirm" in
+                    s | S)
+                        action_service "$service_name" "restart"
+                        service_refresh_screen "$service_name"
+                    ;;
+                    n | N |"")
+                        printf '%bOperación cancelada.%b\n' "$YELLOW" "$NC"
+                        continue
+                    ;;
+                    *)
+                        printf '%bOpción inválida. No se reinició el servicio.%b\n' "$YELLOW" "$NC"
+                    ;;
+                esac
                 ;;
             2)
-                action_service "$service_name" "stop"
-                service_refresh_screen "$service_name"
+                read -p "Esta seguro que desea detener el servicio $service_name [s/N]: " confirm
+
+                case "$confirm" in
+                    s | S)
+                        action_service "$service_name" "stop"
+                        service_refresh_screen "$service_name"
+                    ;;
+                    n | N |"")
+                        printf '%bOperación cancelada.%b\n' "$YELLOW" "$NC"
+                        continue
+                    ;;
+                    *)
+                        printf '%bOpción inválida. No se reinició el servicio.%b\n' "$YELLOW" "$NC"
+                    ;;
+                esac
                 ;;
             3)
                 action_service "$service_name" "reload"
                 service_refresh_screen "$service_name"
                 ;;
             4)
+                log_info "Consulta de logs del servicio '$service_name'"
                 printf '%bPresione Q para salir.%b\n' "$GREEN" "$NC"
                 journalctl -u "$service_name"
                 # break
@@ -246,8 +273,6 @@ service_menu() {
                 ;;
         esac
 
-        # printf '\n'
-        # read -rp "Presione ENTER para continuar..."
     done
 }
 
