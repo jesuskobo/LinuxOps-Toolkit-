@@ -498,6 +498,11 @@ El roadmap contempla la incorporación progresiva de tecnologías y prácticas r
 
 # 📄 Licencia
 
-Este proyecto se distribuye bajo la licencia **MIT**.
+Copyright © 2026 Jesús Rivera. Todos los derechos reservados.
+
+LinuxOps Toolkit es software propietario. El código fuente se publica
+con fines de evaluación técnica y portafolio. Cualquier uso, copia,
+modificación o distribución requiere autorización previa y expresa
+del autor.
 
 ---
