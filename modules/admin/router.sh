@@ -63,6 +63,9 @@ route_admin() {
             backup_menu
             
         ;;
+        "-help"|"-h"|"--help"|"-HELP")
+            show_admin_help
+        ;;
 
         "")
             printf "${RED}Error: subcomando vacio ejecute [linuxops admin -h] para mas informacion.\n"
