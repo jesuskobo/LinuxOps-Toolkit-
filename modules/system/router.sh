@@ -33,7 +33,7 @@ route_system(){
             output_proc=$(process_evaluate)
             render_process_screen "$output_proc"
             ;;
-        "users" | 6)
+        "users" | "user" | 6)
             local output_users
             output_users=$(users_evaluate)
             render_user_screen "$output_users"
