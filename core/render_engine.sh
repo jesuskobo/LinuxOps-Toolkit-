@@ -24,6 +24,7 @@ render_cpu_screen() {
     bar=$(bar_progress_ascii 20 "$cpu_usage")
 
     # Imprimir pantalla maquetada
+    clear
     printf '====================================================================\n'
     printf ' RESULTADO: Uso actual de CPU\n'
     printf '====================================================================\n\n'
@@ -60,6 +61,7 @@ render_memory_screen(){
     local status_color="${GREEN}"
 
     # Imprimir pantalla maquetada
+    clear
     printf '====================================================================\n'
     printf ' RESULTADO: Estado de la Memoria RAM y SWAP\n'
     printf '====================================================================\n'
@@ -97,6 +99,7 @@ render_disk_screen() {
     local status_color="${GREEN}"
 
     # Imprimir pantalla maquetada
+    clear
     printf '====================================================================\n'
     printf ' RESULTADO: Estado del Almacenamiento y Discos\n'
     printf '====================================================================\n\n'
@@ -125,6 +128,7 @@ render_network_screen() {
     IFS='|' read -r n_network n_ip_local n_ip_public n_internet n_port_listen n_status n_rec <<< "$raw_data"
 
     # Imprimir pantalla maquetada
+    clear
     printf '=========================================================================\n'
     printf ' RESULTADO: Estado de la Red e Interfaces\n'
     printf '=========================================================================\n\n'
@@ -154,6 +158,8 @@ render_process_screen() {
     # Imprimir pantalla Maquetada
     local status_color="${GREEN}"
 
+    # Renderizar pantalla en terminal
+    clear
     printf '=========================================================================\n'
     printf 'RESULTADO: Monitoreo de Procesos y Estado del Kernel\n'
     printf '=========================================================================\n\n'
@@ -242,6 +248,7 @@ render_user_screen() {
 
 
     # Imprimir pantalla maquetada
+    clear
     printf '=====================================================================================\n'
     printf 'RESULTADO: Auditoría de Usuarios y Sesiones del Sistema\n'
     printf '=====================================================================================\n\n'
@@ -283,6 +290,7 @@ render_sysinfo_screen(){
     IFS='|' read -r s_hostname s_so s_kernel s_aquitec s_up_time s_around status rec <<< "$raw_data"
     
     # Imprimir pantalla maquetada
+    clear
     printf '=========================================================================\n'
     printf 'RESULTADO: Información General del Sistema y Kernel\n'
     printf '=========================================================================\n\n'
@@ -346,6 +354,7 @@ render_full_audit_screen() {
     )
 
     # 5. Imprimir pantalla maquetada
+    clear
     printf '=========================================================================\n'
     printf '        LINUXOPS TOOLKIT - AUDITORÍA EJECUTIVA DEL SISTEMA\n'
     printf '=========================================================================\n\n'
