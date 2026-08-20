@@ -58,3 +58,101 @@ Opciones:
 
 EOF
 }
+
+# AYUDA DEL MODULO ADMIN
+show_admin_help() {
+
+cat <<EOF
+
+LINUXOPS - ADMIN
+
+Uso:
+    linuxops admin <comando> [opciones]
+
+Comandos disponibles:
+
+    service     Gestión y diagnóstico de servicios systemd
+    backup      Gestión de respaldos del sistema
+
+------------------------------------------------------------------------
+SERVICES
+------------------------------------------------------------------------
+
+Uso:
+    linuxops admin service <acción> <servicio>
+
+Acciones disponibles:
+
+    status <servicio>      Consulta el estado y diagnóstico del servicio
+    start <servicio>       Inicia el servicio
+    stop <servicio>        Detiene el servicio
+    restart <servicio>     Reinicia el servicio
+    reload <servicio>      Recarga la configuración del servicio
+
+Ejemplos:
+
+    linuxops admin service sshd
+    linuxops admin service status sshd
+    linuxops admin service start sshd
+    linuxops admin service stop sshd
+    linuxops admin service restart sshd
+    linuxops admin service reload sshd
+
+Ejemplo de consulta:
+
+    linuxops admin service status sshd
+
+    Muestra:
+        - Estado del servicio
+        - PID principal
+        - CPU
+        - Memoria
+        - Tiempo activo
+        - Inicio automático
+        - Puertos en escucha
+        - Diagnóstico
+        - Menú de acciones
+
+
+------------------------------------------------------------------------
+BACKUPS
+------------------------------------------------------------------------
+
+Uso:
+    linuxops admin backup
+
+Descripción:
+
+    Abre el menú interactivo de gestión de respaldos.
+
+Funciones disponibles:
+
+    [1] Crear respaldo rápido de /etc
+    [2] Crear respaldo personalizado (otra ruta)
+    [3] Purgar respaldos antiguos (defecto 30 días)
+    [4] Salir
+
+Los respaldos se generan en formato:
+
+    Backup_YYYY-MM-DD_HHMMSS.tar.gz
+
+Directorio predeterminado:
+
+    /var/backups/linuxops
+
+
+------------------------------------------------------------------------
+OPCIONES GENERALES
+------------------------------------------------------------------------
+
+    -h, --help      Mostrar esta ayuda
+
+Ejemplos:
+
+    linuxops admin --help
+    linuxops admin service --help
+    linuxops admin backup
+
+EOF
+
+}
