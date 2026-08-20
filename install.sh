@@ -26,7 +26,7 @@ check_root() {
 
 # 2. Checkear si todas las dependencias solicitadas existen
 check_dependencies(){
-    local deps=("bash" "awk" "grep" "sed" "getent" "who" "w" "journalctl" "ps")
+    local deps=("bash" "awk" "grep" "sed" "getent" "who" "w" "journalctl" "ps" "systemctl" "ss" "find" "du" "date")
     local missing=() # agregar comandos que faltan
 
     for cmd in "${deps[@]}"; do
@@ -98,8 +98,11 @@ install_files() {
     # -------------------------------------------------------------------------
     # Directorios persistentes
     # -------------------------------------------------------------------------
-    mkdir -p "${INSTALL_DIR}/log"
+    mkdir -p "${INSTALL_DIR}/logs"
     mkdir -p "${INSTALL_DIR}/reports"
+
+    # Permitir que el usuario ejecute LinuxOps y escriba logs/reportes
+    chown -R "${SUDO_USER}:${SUDO_USER}" "${INSTALL_DIR}/logs" "${INSTALL_DIR}/reports"
 
     # -------------------------------------------------------------------------
     # Permisos

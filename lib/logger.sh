@@ -9,7 +9,9 @@ LOG_FILE="${PROJECT_ROOT}/logs/linuxops.log"
 log_msg() {
     local nivel=$1
     local message=$2
-    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local timestamp
+    
+    timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
 
     #si la carpeta del log no existe por alguna razon la crea
