@@ -2,9 +2,9 @@
 # LinuxOps Toolkit - Módulo de procesos
 
 process_collect() {
-    # Consulta única de todos los procesos del sistema.
+    # Consulta única de todos los procesos del sistema, excluyendo ps
     local consult_process
-    consult_process=$(ps -eo pid,%cpu,%mem,comm,stat --sort=-%cpu)
+    consult_process=$(ps -eo pid,%cpu,%mem,comm,stat --sort=-%cpu |awk 'NR > 1 && $4 != "ps"')
 
     # 1. Obtiene los tres procesos con mayor consumo de CPU.
     # Formato: PID CPU% COMANDO
